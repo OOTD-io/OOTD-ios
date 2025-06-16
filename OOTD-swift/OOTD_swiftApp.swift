@@ -6,12 +6,15 @@
 //
 
 import SwiftUI
+import FirebaseCore
 
 @main
 struct OOTD_swiftApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+
     var body: some Scene {
         WindowGroup {
-            RegistrationView()
+            ContentView()
         }
     }
 }

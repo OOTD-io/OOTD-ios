@@ -9,13 +9,18 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
+        NavigationView {
+                AuthenticatedView {
+                  Image("ootd-icon")
+                    .resizable()
+                    .frame(width: 300 , height: 300)
+                  Text("Welcome to OOTD!")
+                    .font(.title)
+                  Text("You need to be logged in to use this app.")
+                } content: {
+                  Spacer()
+                }
+              }
     }
 }
 

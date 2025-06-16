@@ -6,6 +6,16 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		229CD4622DFE927000549D4B /* FirebaseAI in Frameworks */ = {isa = PBXBuildFile; productRef = 229CD4612DFE927000549D4B /* FirebaseAI */; };
+		229CD4642DFE927000549D4B /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 229CD4632DFE927000549D4B /* FirebaseAnalytics */; };
+		229CD4662DFE927000549D4B /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = 229CD4652DFE927000549D4B /* FirebaseAnalyticsCore */; };
+		229CD4682DFE927000549D4B /* FirebaseAnalyticsIdentitySupport in Frameworks */ = {isa = PBXBuildFile; productRef = 229CD4672DFE927000549D4B /* FirebaseAnalyticsIdentitySupport */; };
+		229CD46A2DFE927000549D4B /* FirebaseAnalyticsOnDeviceConversion in Frameworks */ = {isa = PBXBuildFile; productRef = 229CD4692DFE927000549D4B /* FirebaseAnalyticsOnDeviceConversion */; };
+		229CD46D2DFE937900549D4B /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 229CD46C2DFE937900549D4B /* FirebaseAuth */; };
+		229CD46F2DFE937900549D4B /* FirebaseAuthCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 229CD46E2DFE937900549D4B /* FirebaseAuthCombine-Community */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		22DFF9862DE55C5800955A74 /* OOTD-swift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "OOTD-swift.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -14,6 +24,7 @@
 		22DFF99F2DE5674500955A74 /* Exceptions for "OOTD-swift" folder in "OOTD-swift" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Info.plist,
 				"ootd-icons/appstore.png",
 				"ootd-icons/playstore.png",
 			);
@@ -37,6 +48,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				229CD4682DFE927000549D4B /* FirebaseAnalyticsIdentitySupport in Frameworks */,
+				229CD46D2DFE937900549D4B /* FirebaseAuth in Frameworks */,
+				229CD4642DFE927000549D4B /* FirebaseAnalytics in Frameworks */,
+				229CD46A2DFE927000549D4B /* FirebaseAnalyticsOnDeviceConversion in Frameworks */,
+				229CD4662DFE927000549D4B /* FirebaseAnalyticsCore in Frameworks */,
+				229CD46F2DFE937900549D4B /* FirebaseAuthCombine-Community in Frameworks */,
+				229CD4622DFE927000549D4B /* FirebaseAI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -47,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				22DFF9882DE55C5800955A74 /* OOTD-swift */,
+				22DFF9AA2DE69D9700955A74 /* Frameworks */,
 				22DFF9872DE55C5800955A74 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -57,6 +76,13 @@
 				22DFF9862DE55C5800955A74 /* OOTD-swift.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		22DFF9AA2DE69D9700955A74 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -79,6 +105,13 @@
 			);
 			name = "OOTD-swift";
 			packageProductDependencies = (
+				229CD4612DFE927000549D4B /* FirebaseAI */,
+				229CD4632DFE927000549D4B /* FirebaseAnalytics */,
+				229CD4652DFE927000549D4B /* FirebaseAnalyticsCore */,
+				229CD4672DFE927000549D4B /* FirebaseAnalyticsIdentitySupport */,
+				229CD4692DFE927000549D4B /* FirebaseAnalyticsOnDeviceConversion */,
+				229CD46C2DFE937900549D4B /* FirebaseAuth */,
+				229CD46E2DFE937900549D4B /* FirebaseAuthCombine-Community */,
 			);
 			productName = "OOTD-swift";
 			productReference = 22DFF9862DE55C5800955A74 /* OOTD-swift.app */;
@@ -92,7 +125,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1630;
-				LastUpgradeCheck = 1630;
+				LastUpgradeCheck = 1640;
 				TargetAttributes = {
 					22DFF9852DE55C5800955A74 = {
 						CreatedOnToolsVersion = 16.3;
@@ -109,7 +142,8 @@
 			mainGroup = 22DFF97D2DE55C5800955A74;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				22DFF9A92DE5714100955A74 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				229CD4602DFE927000549D4B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				229CD46B2DFE92E300549D4B /* XCRemoteSwiftPackageReference "FirebaseUI-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 22DFF9872DE55C5800955A74 /* Products */;
@@ -176,7 +210,10 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_FILE_ACCESS_PICTURE_FOLDER = readwrite;
+				ENABLE_RESOURCE_ACCESS_CAMERA = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -194,6 +231,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -237,8 +275,11 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_FILE_ACCESS_PICTURE_FOLDER = readwrite;
 				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
@@ -249,6 +290,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -264,8 +306,11 @@
 				CODE_SIGN_ENTITLEMENTS = "OOTD-swift/OOTD_swift.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "OOTD-swift/Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Allow app to access camera and photo albums";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -301,8 +346,11 @@
 				CODE_SIGN_ENTITLEMENTS = "OOTD-swift/OOTD_swift.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "OOTD-swift/Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Allow app to access camera and photo albums";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -354,15 +402,61 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		22DFF9A92DE5714100955A74 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+		229CD4602DFE927000549D4B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 11.13.0;
+				minimumVersion = 11.14.0;
+			};
+		};
+		229CD46B2DFE92E300549D4B /* XCRemoteSwiftPackageReference "FirebaseUI-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/FirebaseUI-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.6.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		229CD4612DFE927000549D4B /* FirebaseAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 229CD4602DFE927000549D4B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAI;
+		};
+		229CD4632DFE927000549D4B /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 229CD4602DFE927000549D4B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		229CD4652DFE927000549D4B /* FirebaseAnalyticsCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 229CD4602DFE927000549D4B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsCore;
+		};
+		229CD4672DFE927000549D4B /* FirebaseAnalyticsIdentitySupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 229CD4602DFE927000549D4B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsIdentitySupport;
+		};
+		229CD4692DFE927000549D4B /* FirebaseAnalyticsOnDeviceConversion */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 229CD4602DFE927000549D4B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsOnDeviceConversion;
+		};
+		229CD46C2DFE937900549D4B /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 229CD4602DFE927000549D4B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		229CD46E2DFE937900549D4B /* FirebaseAuthCombine-Community */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 229CD4602DFE927000549D4B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseAuthCombine-Community";
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 22DFF97E2DE55C5800955A74 /* Project object */;
 }
