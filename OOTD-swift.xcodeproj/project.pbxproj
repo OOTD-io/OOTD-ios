@@ -6,7 +6,22 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		224ED4FE2E01FF7300F94BD3 /* WeatherManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224ED4FD2E01FF7300F94BD3 /* WeatherManager.swift */; };
+		224ED5452E021EDB00F94BD3 /* FirebaseAI in Frameworks */ = {isa = PBXBuildFile; productRef = 224ED5442E021EDB00F94BD3 /* FirebaseAI */; };
+		224ED5472E021EDB00F94BD3 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 224ED5462E021EDB00F94BD3 /* FirebaseAnalytics */; };
+		224ED5492E021EDB00F94BD3 /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = 224ED5482E021EDB00F94BD3 /* FirebaseAnalyticsCore */; };
+		224ED54B2E021EDB00F94BD3 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 224ED54A2E021EDB00F94BD3 /* FirebaseAuth */; };
+		224ED54D2E021EDB00F94BD3 /* FirebaseAuthCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 224ED54C2E021EDB00F94BD3 /* FirebaseAuthCombine-Community */; };
+		224ED54F2E021EDB00F94BD3 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 224ED54E2E021EDB00F94BD3 /* FirebaseCore */; };
+		224ED5512E021EDB00F94BD3 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 224ED5502E021EDB00F94BD3 /* FirebaseDatabase */; };
+		224ED5532E021EDB00F94BD3 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 224ED5522E021EDB00F94BD3 /* FirebaseFirestore */; };
+		224ED5552E021EDB00F94BD3 /* FirebaseFirestoreCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 224ED5542E021EDB00F94BD3 /* FirebaseFirestoreCombine-Community */; };
+		224ED5572E021EDB00F94BD3 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 224ED5562E021EDB00F94BD3 /* FirebaseStorage */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
+		224ED4FD2E01FF7300F94BD3 /* WeatherManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherManager.swift; sourceTree = "<group>"; };
 		22DFF9862DE55C5800955A74 /* OOTD-swift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "OOTD-swift.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -14,6 +29,7 @@
 		22DFF99F2DE5674500955A74 /* Exceptions for "OOTD-swift" folder in "OOTD-swift" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Info.plist,
 				"ootd-icons/appstore.png",
 				"ootd-icons/playstore.png",
 			);
@@ -37,6 +53,16 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				224ED5472E021EDB00F94BD3 /* FirebaseAnalytics in Frameworks */,
+				224ED5492E021EDB00F94BD3 /* FirebaseAnalyticsCore in Frameworks */,
+				224ED5452E021EDB00F94BD3 /* FirebaseAI in Frameworks */,
+				224ED5572E021EDB00F94BD3 /* FirebaseStorage in Frameworks */,
+				224ED5552E021EDB00F94BD3 /* FirebaseFirestoreCombine-Community in Frameworks */,
+				224ED54B2E021EDB00F94BD3 /* FirebaseAuth in Frameworks */,
+				224ED54F2E021EDB00F94BD3 /* FirebaseCore in Frameworks */,
+				224ED5532E021EDB00F94BD3 /* FirebaseFirestore in Frameworks */,
+				224ED5512E021EDB00F94BD3 /* FirebaseDatabase in Frameworks */,
+				224ED54D2E021EDB00F94BD3 /* FirebaseAuthCombine-Community in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -46,7 +72,9 @@
 		22DFF97D2DE55C5800955A74 = {
 			isa = PBXGroup;
 			children = (
+				224ED4FD2E01FF7300F94BD3 /* WeatherManager.swift */,
 				22DFF9882DE55C5800955A74 /* OOTD-swift */,
+				22DFF9AA2DE69D9700955A74 /* Frameworks */,
 				22DFF9872DE55C5800955A74 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -57,6 +85,13 @@
 				22DFF9862DE55C5800955A74 /* OOTD-swift.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		22DFF9AA2DE69D9700955A74 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -79,6 +114,16 @@
 			);
 			name = "OOTD-swift";
 			packageProductDependencies = (
+				224ED5442E021EDB00F94BD3 /* FirebaseAI */,
+				224ED5462E021EDB00F94BD3 /* FirebaseAnalytics */,
+				224ED5482E021EDB00F94BD3 /* FirebaseAnalyticsCore */,
+				224ED54A2E021EDB00F94BD3 /* FirebaseAuth */,
+				224ED54C2E021EDB00F94BD3 /* FirebaseAuthCombine-Community */,
+				224ED54E2E021EDB00F94BD3 /* FirebaseCore */,
+				224ED5502E021EDB00F94BD3 /* FirebaseDatabase */,
+				224ED5522E021EDB00F94BD3 /* FirebaseFirestore */,
+				224ED5542E021EDB00F94BD3 /* FirebaseFirestoreCombine-Community */,
+				224ED5562E021EDB00F94BD3 /* FirebaseStorage */,
 			);
 			productName = "OOTD-swift";
 			productReference = 22DFF9862DE55C5800955A74 /* OOTD-swift.app */;
@@ -92,7 +137,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1630;
-				LastUpgradeCheck = 1630;
+				LastUpgradeCheck = 1640;
 				TargetAttributes = {
 					22DFF9852DE55C5800955A74 = {
 						CreatedOnToolsVersion = 16.3;
@@ -109,7 +154,8 @@
 			mainGroup = 22DFF97D2DE55C5800955A74;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				22DFF9A92DE5714100955A74 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				224ED5422E021E7A00F94BD3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				224ED5432E021E8D00F94BD3 /* XCRemoteSwiftPackageReference "FirebaseUI-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 22DFF9872DE55C5800955A74 /* Products */;
@@ -136,6 +182,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				224ED4FE2E01FF7300F94BD3 /* WeatherManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -176,7 +223,10 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_FILE_ACCESS_PICTURE_FOLDER = readwrite;
+				ENABLE_RESOURCE_ACCESS_CAMERA = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -194,6 +244,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -237,8 +288,11 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_FILE_ACCESS_PICTURE_FOLDER = readwrite;
 				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
@@ -249,6 +303,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -264,8 +319,12 @@
 				CODE_SIGN_ENTITLEMENTS = "OOTD-swift/OOTD_swift.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = BFWG73R2SW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "OOTD-swift/Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Allow app to access camera and photo albums";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -285,7 +344,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
@@ -298,11 +358,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "OOTD-swift/OOTD_swift.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "OOTD-swift/OOTD-swiftRelease.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = BFWG73R2SW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "OOTD-swift/Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Allow app to access camera and photo albums";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -322,7 +386,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
@@ -354,15 +419,76 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		22DFF9A92DE5714100955A74 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+		224ED5422E021E7A00F94BD3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 11.13.0;
+				minimumVersion = 11.14.0;
+			};
+		};
+		224ED5432E021E8D00F94BD3 /* XCRemoteSwiftPackageReference "FirebaseUI-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/FirebaseUI-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.6.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		224ED5442E021EDB00F94BD3 /* FirebaseAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 224ED5422E021E7A00F94BD3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAI;
+		};
+		224ED5462E021EDB00F94BD3 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 224ED5422E021E7A00F94BD3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		224ED5482E021EDB00F94BD3 /* FirebaseAnalyticsCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 224ED5422E021E7A00F94BD3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsCore;
+		};
+		224ED54A2E021EDB00F94BD3 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 224ED5422E021E7A00F94BD3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		224ED54C2E021EDB00F94BD3 /* FirebaseAuthCombine-Community */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 224ED5422E021E7A00F94BD3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseAuthCombine-Community";
+		};
+		224ED54E2E021EDB00F94BD3 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 224ED5422E021E7A00F94BD3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		224ED5502E021EDB00F94BD3 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 224ED5422E021E7A00F94BD3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		224ED5522E021EDB00F94BD3 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 224ED5422E021E7A00F94BD3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		224ED5542E021EDB00F94BD3 /* FirebaseFirestoreCombine-Community */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 224ED5422E021E7A00F94BD3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseFirestoreCombine-Community";
+		};
+		224ED5562E021EDB00F94BD3 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 224ED5422E021E7A00F94BD3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 22DFF97E2DE55C5800955A74 /* Project object */;
 }
