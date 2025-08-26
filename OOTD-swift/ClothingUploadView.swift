@@ -19,6 +19,8 @@ struct ClothingUploadView: View {
 
     @State private var showCamera = false
     @State private var activeCameraTarget: String?
+    @State private var isUploading = false
+    @State private var uploadMessage = ""
 
     var body: some View {
         VStack(spacing: 30) {
@@ -47,6 +49,26 @@ struct ClothingUploadView: View {
                 })
             }
 
+            if isUploading {
+                ProgressView()
+                    .padding()
+            } else {
+                Button(action: uploadImages) {
+                    Text("Analyze Images")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .cornerRadius(10)
+                }
+                .padding(.horizontal)
+            }
+
+            Text(uploadMessage)
+                .font(.caption)
+                .foregroundColor(.gray)
+
             Spacer()
         }
         .padding()
@@ -58,6 +80,35 @@ struct ClothingUploadView: View {
         }
         .onChange(of: selectedPickerItem) {
             loadPickerImage()
+        }
+    }
+
+    func uploadImages() {
+        isUploading = true
+        uploadMessage = ""
+
+        let imagesToUpload = [frontImage, backImage, tagImage].compactMap { $0 }
+
+        guard !imagesToUpload.isEmpty else {
+            uploadMessage = "Please select at least one image."
+            isUploading = false
+            return
+        }
+
+        Task {
+            do {
+                let response = try await AIEngineClient.shared.describeClothing(images: imagesToUpload)
+                DispatchQueue.main.async {
+                    self.uploadMessage = response.message
+                    self.isUploading = false
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.uploadMessage = "Failed to analyze images. Please try again."
+                    print("Error uploading images: \(error)")
+                    self.isUploading = false
+                }
+            }
         }
     }
 
