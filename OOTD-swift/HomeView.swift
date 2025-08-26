@@ -116,7 +116,7 @@ struct HomeView<Content>: View where Content: View{
                 }
                 .foregroundColor(selectedTab == .profile ? .blue : .gray)
                 .onReceive(NotificationCenter.default.publisher(for: ASAuthorizationAppleIDProvider.credentialRevokedNotification)) { event in
-                  viewModel.signOut()
+//                signOut()
                   if let userInfo = event.userInfo, let info = userInfo["info"] {
                     print(info)
                   }

@@ -27,7 +27,6 @@
 
 import SwiftUI
 import Combine
-import FirebaseAnalytics
 import AuthenticationServices
 
 private enum FocusableField: Hashable {
@@ -141,7 +140,7 @@ struct LoginView: View {
     }
     .listStyle(.plain)
     .padding()
-    .analyticsScreen(name: "\(Self.self)")
+//    .analyticsScreen(name: "\(Self.self)")
   }
 }
 

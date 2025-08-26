@@ -26,8 +26,8 @@
 
 import SwiftUI
 import Combine
-import FirebaseAnalytics
 import _AuthenticationServices_SwiftUI
+import Supabase
 
 private enum FocusableField: Hashable {
   case email
@@ -157,7 +157,7 @@ struct SignupView: View {
     }
     .listStyle(.plain)
     .padding()
-    .analyticsScreen(name: "\(Self.self)")
+//    .analyticsScreen(name: "\(Self.self)")
   }
 }
 

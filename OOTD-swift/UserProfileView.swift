@@ -26,7 +26,6 @@
 // limitations under the License.
 
 import SwiftUI
-import FirebaseAnalytics
 
 struct UserProfileView: View {
   @EnvironmentObject var viewModel: AuthenticationViewModel
@@ -41,9 +40,22 @@ struct UserProfileView: View {
     }
   }
 
-  private func signOut() {
-    viewModel.signOut()
+    private func signOut() {
+        Task {
+            await viewModel.signOut()
+            print("SIGNED THE FUCK OUT")
+        }
   }
+    
+    private func getUserEmail() -> String {
+        var res = supabase.auth.currentUser?.email ?? "WE FUCKED UP"
+        Task {
+            res = supabase.auth.currentUser?.email ?? "WE FUCKED UP"
+            print(supabase.auth.currentUser as Any)
+            return res;
+        }
+        return res;
+    }
 
   var body: some View {
     Form {
@@ -68,10 +80,10 @@ struct UserProfileView: View {
       }
       .listRowBackground(Color(UIColor.systemGroupedBackground))
       Section("Email") {
-        Text(viewModel.displayName)
+          Text(getUserEmail())
       }
       Section {
-        Button(role: .cancel, action: signOut) {
+          Button(role: .cancel, action: signOut) {
           HStack {
             Spacer()
             Text("Sign out")
@@ -91,7 +103,7 @@ struct UserProfileView: View {
     }
     .navigationTitle("Profile")
     .navigationBarTitleDisplayMode(.inline)
-    .analyticsScreen(name: "\(Self.self)")
+//    .analyticsScreen(name: "\(Self.self)")
     .confirmationDialog("Deleting your account is permanent. Do you want to delete your account?",
                         isPresented: $presentingConfirmationDialog, titleVisibility: .visible) {
       Button("Delete Account", role: .destructive, action: deleteAccount)
