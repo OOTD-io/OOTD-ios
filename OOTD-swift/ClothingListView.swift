@@ -9,22 +9,31 @@ import SwiftUI
 
 struct ClothingListView: View {
     let title: String
-    let items: [ClothingItem]
-    @State private var selectedItem: ClothingItem? = nil
+    @State private var items: [ClothingItem] = []
+    @State private var isLoading = true
+    @State private var errorMessage: String?
+
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
-        ScrollView {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 20)], spacing: 20) {
-                ForEach(0..<20) { _ in
-                    ClothingNavigationTile(clothing: items[0], isLarge: false)
-//                    ClothingTile(item: items[0], isLarge: true)
-//                        .onTapGesture {
-//                            selectedItem = items[0]
-//                        }
+        Group {
+            if isLoading {
+                ProgressView("Loading...")
+            } else if let errorMessage = errorMessage {
+                Text("Error: \(errorMessage)")
+            } else {
+                ScrollView {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 20)], spacing: 20) {
+                        ForEach(items) { item in
+                            // Assuming ClothingNavigationTile can be initialized with the new ClothingItem
+                            // and can handle fetching the image from the 'images' dictionary.
+                            // This might require changes to ClothingNavigationTile.
+                            ClothingNavigationTile(clothing: item, isLarge: false)
+                        }
+                    }
+                    .padding()
                 }
             }
-            .padding()
         }
         .navigationTitle(title)
         .navigationBarBackButtonHidden(true)
@@ -50,8 +59,26 @@ struct ClothingListView: View {
                 }
             }
         }
-//        .sheet(item: $selectedItem) {
-//            ClothingDetailView(item: $0)
-//        }
+        .onAppear(perform: fetchClothes)
+    }
+
+    private func fetchClothes() {
+        isLoading = true
+        errorMessage = nil
+        Task {
+            do {
+                let response = try await AIEngineClient.shared.getClothes()
+                DispatchQueue.main.async {
+                    self.items = response.clothes
+                    self.isLoading = false
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.errorMessage = error.localizedDescription
+                    self.isLoading = false
+                    print("Failed to fetch clothes: \(error)")
+                }
+            }
+        }
     }
 }

@@ -13,35 +13,26 @@ struct ClothingTile: View {
 
     var body: some View {
         VStack {
-            if let sceneName = item.sceneImage {
-                SceneKitView(modelName: sceneName)
-                    .frame(width: isLarge ? 140 : 100, height: isLarge ? 140 : 100)
-                    .clipShape(.buttonBorder)
-                //                .frame(height: 300)
-                //                .cornerRadius(12)
-                //                .padding()
-                //                .background(.clear)
-            } else {
-                item.image
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: isLarge ? 140 : 100, height: isLarge ? 140 : 100)
-                    .background(Color.gray.opacity(0.2))
-                    .clipped()
-                    .cornerRadius(12)
+            image(from: item.images["front"])
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: isLarge ? 140 : 100, height: isLarge ? 140 : 100)
+                .background(Color.gray.opacity(0.2))
+                .clipped()
+                .cornerRadius(12)
 
-            }
-//            item.image
-//                .resizable()
-//                .aspectRatio(contentMode: .fit)
-//                .frame(width: isLarge ? 140 : 100, height: isLarge ? 140 : 100)
-//                .background(Color.gray.opacity(0.2))
-//                .clipped()
-//                .cornerRadius(12)
-
-            Text(item.name)
+            Text("\(item.type) - \(item.subtype)")
                 .font(.caption)
                 .lineLimit(1)
         }
+    }
+
+    private func image(from base64String: String?) -> Image {
+        guard let base64String = base64String,
+              let data = Data(base64Encoded: base64String),
+              let uiImage = UIImage(data: data) else {
+            return Image(systemName: "photo")
+        }
+        return Image(uiImage: uiImage)
     }
 }

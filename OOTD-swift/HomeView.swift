@@ -16,6 +16,9 @@ struct HomeView<Content>: View where Content: View{
     @State private var presentingProfileScreen = false
     @StateObject private var locationManager = LocationManager()
     @StateObject private var weatherManager = WeatherManager()
+    @State private var generatedOutfits: [Outfit] = []
+    @State private var isGenerating = false
+    @State private var generationError: String?
     
     @ViewBuilder var content: () -> Content
     
@@ -43,6 +46,19 @@ struct HomeView<Content>: View where Content: View{
                         if let weather = weatherManager.currentWeather {
                             WeatherCard(weather: weather)
                                 .padding(.vertical, 8)
+
+                            Button(action: generateOutfit) {
+                                Text("Generate Outfit")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .padding()
+                                    .frame(maxWidth: .infinity)
+                                    .background(isGenerating ? Color.gray : Color.blue)
+                                    .cornerRadius(10)
+                            }
+                            .disabled(isGenerating)
+                            .padding(.horizontal)
+
                         } else {
                             Text("Loading weather…")
                                 .foregroundColor(.gray)
@@ -54,6 +70,18 @@ struct HomeView<Content>: View where Content: View{
                                     }
                                 }
                         }
+
+                        if isGenerating {
+                            ProgressView("Generating outfits...")
+                        } else if let error = generationError {
+                            Text("Error: \(error)")
+                                .foregroundColor(.red)
+                        } else {
+                            ForEach(generatedOutfits) { outfit in
+                                OutfitView(outfit: outfit)
+                            }
+                        }
+
                         ClosetView()
                     }
                     
@@ -155,4 +183,65 @@ struct ProfileView: View {
 
 #Preview {
 //    HomeView(nil, nil)
+}
+
+extension HomeView {
+    func generateOutfit() {
+        isGenerating = true
+        generationError = nil
+
+        guard let weather = weatherManager.currentWeather else {
+            generationError = "Could not get current weather."
+            isGenerating = false
+            return
+        }
+
+        let weatherInfo = WeatherInfo(
+            temperature: weather.temperature.value,
+            condition: weather.condition.description,
+            windSpeed: weather.wind.speed.value,
+            uvIndex: weather.uvIndex.value
+        )
+
+        Task {
+            do {
+                let response = try await AIEngineClient.shared.generateOutfit(weather: weatherInfo)
+                DispatchQueue.main.async {
+                    self.generatedOutfits = response.outfits
+                    self.isGenerating = false
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.generationError = "Failed to generate outfits: \(error.localizedDescription)"
+                    self.isGenerating = false
+                    print("Outfit generation error: \(error)")
+                }
+            }
+        }
+    }
+}
+
+struct OutfitView: View {
+    let outfit: Outfit
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text("Generated Outfit")
+                .font(.headline)
+                .padding(.horizontal)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack {
+                    ForEach(outfit.items) { item in
+                        ClothingTile(item: item, isLarge: true)
+                    }
+                }
+                .padding(.horizontal)
+            }
+        }
+        .padding(.vertical)
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+        .padding(.horizontal)
+    }
 }

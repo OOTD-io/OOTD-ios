@@ -19,7 +19,7 @@ struct ClothingUploadView: View {
 
     @State private var showCamera = false
     @State private var activeCameraTarget: String?
-    @State private var isUploading = false
+    @State private var isSaving = false
     @State private var uploadMessage = ""
 
     var body: some View {
@@ -49,12 +49,12 @@ struct ClothingUploadView: View {
                 })
             }
 
-            if isUploading {
+            if isSaving {
                 ProgressView()
                     .padding()
             } else {
-                Button(action: uploadImages) {
-                    Text("Analyze Images")
+                Button(action: saveClothingItem) {
+                    Text("Save Clothing")
                         .font(.headline)
                         .foregroundColor(.white)
                         .padding()
@@ -83,30 +83,32 @@ struct ClothingUploadView: View {
         }
     }
 
-    func uploadImages() {
-        isUploading = true
+    func saveClothingItem() {
+        isSaving = true
         uploadMessage = ""
 
-        let imagesToUpload = [frontImage, backImage, tagImage].compactMap { $0 }
-
-        guard !imagesToUpload.isEmpty else {
-            uploadMessage = "Please select at least one image."
-            isUploading = false
+        guard let front = frontImage else {
+            uploadMessage = "The front image is required."
+            isSaving = false
             return
         }
 
         Task {
             do {
-                let response = try await AIEngineClient.shared.describeClothing(images: imagesToUpload)
+                let response = try await AIEngineClient.shared.saveClothing(
+                    frontImage: front,
+                    backImage: backImage,
+                    tagImage: tagImage
+                )
                 DispatchQueue.main.async {
-                    self.uploadMessage = response.message
-                    self.isUploading = false
+                    self.uploadMessage = "\(response.message) (ID: \(response.itemId))"
+                    self.isSaving = false
                 }
             } catch {
                 DispatchQueue.main.async {
-                    self.uploadMessage = "Failed to analyze images. Please try again."
-                    print("Error uploading images: \(error)")
-                    self.isUploading = false
+                    self.uploadMessage = "Failed to save clothing. Please try again."
+                    print("Error saving clothing: \(error)")
+                    self.isSaving = false
                 }
             }
         }

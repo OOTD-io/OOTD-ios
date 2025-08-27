@@ -14,42 +14,42 @@ struct ClothingDetailView: View {
     let item: ClothingItem
     @Environment(\.dismiss) private var dismiss
 
-    
-
     var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
-                //            if let filename = item.usdzFilename,
-                //            Bundle.main.url(forResource: <#T##String?#>, withExtension: <#T##String?#>)
-                //            let url = Bundle.main.url(forResource: "harry_potter_uniform", withExtension: "usdz")
-                //            USDZPreview(usdzURL: url!)
-                //                    .frame(height: 300)
-                //                    .cornerRadius(12)
-                //                    .padding(.top)
-                //            ARModelView(modelName: "harry_potter_uniform")
-                if let sceneName = item.sceneImage {
-                    SceneKitView(modelName: sceneName)
-//                        .ignoresSafeArea()
-                                    .frame(height: 300)
-                    //                .cornerRadius(12)
-                    //                .padding()
-                    //                .background(.clear)
-                } else {
-                    item.image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(height: 200)
-                        .cornerRadius(16)
-                        .padding(.top)
-                }
-                
-                
-                Text(item.name)
-                    .font(.title2)
+            VStack(alignment: .leading, spacing: 16) {
+                image(from: item.images["front"])
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(height: 300)
+                    .cornerRadius(16)
+                    .frame(maxWidth: .infinity)
+
+                Text("\(item.brand ?? "Unknown Brand")")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+
+                Text("\(item.type) - \(item.subtype)")
+                    .font(.title)
                     .bold()
-                
-                Text("Size: \(item.size)")
-                    .font(.body)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    detailRow(title: "Size", value: item.size)
+                    detailRow(title: "Material", value: item.material)
+                    detailRow(title: "Primary Color", value: item.color["primary"])
+                    detailRow(title: "Secondary Color", value: item.color["secondary"])
+                    detailRow(title: "Pattern", value: item.pattern)
+                }
+                .padding()
+                .background(Color(.secondarySystemBackground))
+                .cornerRadius(12)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Occasions")
+                        .font(.headline)
+                    Text(item.occasion?.joined(separator: ", ") ?? "N/A")
+                        .font(.body)
+                }
+                .padding()
                 
                 Spacer()
             }
@@ -79,6 +79,31 @@ struct ClothingDetailView: View {
 //                    )
                 }
             }
+        }
+    }
+
+    private func image(from base64String: String?) -> Image {
+        guard let base64String = base64String,
+              let data = Data(base64Encoded: base64String),
+              let uiImage = UIImage(data: data) else {
+            return Image(systemName: "photo")
+        }
+        return Image(uiImage: uiImage)
+    }
+
+    @ViewBuilder
+    private func detailRow(title: String, value: String?) -> some View {
+        if let value = value, !value.isEmpty {
+            HStack {
+                Text(title)
+                    .font(.headline)
+                Spacer()
+                Text(value)
+                    .font(.body)
+                    .foregroundColor(.secondary)
+            }
+        } else {
+            EmptyView()
         }
     }
 }
