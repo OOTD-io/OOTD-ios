@@ -12,6 +12,9 @@ import AuthenticationServices
 
 struct HomeView<Content>: View where Content: View{
     @StateObject private var viewModel = AuthenticationViewModel()
+    @StateObject private var homeViewModel = HomeViewModel()
+    @StateObject private var closetViewModel = ClosetViewModel()
+
     @State private var presentingLoginScreen = false
     @State private var presentingProfileScreen = false
     @StateObject private var locationManager = LocationManager()
@@ -36,13 +39,29 @@ struct HomeView<Content>: View where Content: View{
             Group {
                 switch selectedTab {
                 case .closet:
-//                    VStack {
-                        // Weather View
                     ScrollView() {
-                        // Weather View
                         if let weather = weatherManager.currentWeather {
                             WeatherCard(weather: weather)
                                 .padding(.vertical, 8)
+
+                            if homeViewModel.isLoading {
+                                ProgressView("Generating your outfit...")
+                            } else {
+                                Button(action: {
+                                    Task {
+                                        await homeViewModel.generateOutfits(weather: weather.weather.first?.description ?? "")
+                                    }
+                                }) {
+                                    Text("Generate Outfit")
+                                        .fontWeight(.semibold)
+                                        .frame(minWidth: 0, maxWidth: .infinity)
+                                        .padding()
+                                        .background(Color.green)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(10)
+                                }
+                                .padding(.horizontal)
+                            }
                         } else {
                             Text("Loading weather…")
                                 .foregroundColor(.gray)
@@ -54,7 +73,7 @@ struct HomeView<Content>: View where Content: View{
                                     }
                                 }
                         }
-                        ClosetView()
+                        ClosetView(viewModel: closetViewModel)
                     }
                     
                 case .add:
@@ -101,7 +120,6 @@ struct HomeView<Content>: View where Content: View{
                             .font(.system(size: 24, weight: .bold))
                     }
                 }
-//                            .offset(y: -20)
 
                 Spacer()
 
@@ -116,7 +134,6 @@ struct HomeView<Content>: View where Content: View{
                 }
                 .foregroundColor(selectedTab == .profile ? .blue : .gray)
                 .onReceive(NotificationCenter.default.publisher(for: ASAuthorizationAppleIDProvider.credentialRevokedNotification)) { event in
-//                signOut()
                   if let userInfo = event.userInfo, let info = userInfo["info"] {
                     print(info)
                   }
@@ -126,32 +143,14 @@ struct HomeView<Content>: View where Content: View{
             }
             .padding(.vertical, 10)
             .background(Color.white.ignoresSafeArea(edges: .bottom))
-//            .clipShape(RoundedRectangle(cornerRadius: 20))
             .shadow(color: .gray.opacity(0.2), radius: 5, y: -2)
             .offset(y:30)
         }
+        .sheet(isPresented: $homeViewModel.shouldShowOutfits) {
+            OutfitView(outfits: homeViewModel.generatedOutfits, closetViewModel: closetViewModel)
+        }
     }
 }
-
-// Placeholder Views
-//struct ClosetView: View {
-//    var body: some View {
-//        Text("Closet")
-//    }
-//}
-
-struct AddView: View {
-    var body: some View {
-        Text("Add New Item")
-    }
-}
-
-struct ProfileView: View {
-    var body: some View {
-        Text("Profile")
-    }
-}
-
 
 #Preview {
 //    HomeView(nil, nil)

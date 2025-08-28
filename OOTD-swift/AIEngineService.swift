@@ -1,0 +1,195 @@
+import Foundation
+import Supabase
+
+// MARK: - API Service
+class AIEngineService {
+    static let shared = AIEngineService()
+    private let baseURL = URL(string: "https://ootd-ai-engine-785972969271.us-central1.run.app")!
+
+    private func getAccessToken() async throws -> String {
+        let session = try await supabase.auth.session
+        return session.accessToken
+    }
+
+    func generateOutfit(weather: String) async throws -> GenerateOutfitResponse {
+        let url = baseURL.appendingPathComponent("/generate")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let accessToken = try await getAccessToken()
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+
+        let requestBody = GenerateOutfitRequest(weather: weather)
+        request.httpBody = try JSONEncoder().encode(requestBody)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 201 else {
+            throw APIError.serverError
+        }
+
+        return try JSONDecoder().decode(GenerateOutfitResponse.self, from: data)
+    }
+
+    func getClothes() async throws -> GetClothesResponse {
+        let url = baseURL.appendingPathComponent("/clothes")
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+
+        let accessToken = try await getAccessToken()
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw APIError.serverError
+        }
+
+        return try JSONDecoder().decode(GetClothesResponse.self, from: data)
+    }
+
+    func saveClothing(item: ClothingItemRequest) async throws -> SaveClothingResponse {
+        let url = baseURL.appendingPathComponent("/save-clothing")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let accessToken = try await getAccessToken()
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+
+        request.httpBody = try JSONEncoder().encode(item)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 201 else {
+            let errorDetail = String(data: data, encoding: .utf8)
+            print("Error response from server: \(errorDetail ?? "No details")")
+            throw APIError.serverError
+        }
+
+        return try JSONDecoder().decode(SaveClothingResponse.self, from: data)
+    }
+}
+
+// MARK: - API Models
+
+enum APIError: Error {
+    case invalidURL
+    case serverError
+    case decodingError
+}
+
+// /generate
+struct GenerateOutfitRequest: Codable {
+    let weather: String
+}
+
+struct GenerateOutfitResponse: Codable {
+    let userId: String
+    let totalOutfitsGenerated: Int
+    let outfits: [Outfit]
+
+    enum CodingKeys: String, CodingKey {
+        case userId = "user_id"
+        case totalOutfitsGenerated = "total_outfits_generated"
+        case outfits
+    }
+}
+
+struct Outfit: Codable {
+    let tops: [String]
+    let bottoms: [String]
+    let shoes: [String]
+    let outerwear: [String]
+    let accessories: [String]
+}
+
+// /clothes
+struct GetClothesResponse: Codable {
+    let clothes: [ClothingItemDTO]
+    let totalCount: Int
+    let userId: String
+
+    enum CodingKeys: String, CodingKey {
+        case clothes
+        case totalCount = "total_count"
+        case userId = "user_id"
+    }
+}
+
+// This is the model for the clothing item returned by the API
+struct ClothingItemDTO: Codable, Identifiable {
+    let id: String
+    let userUuid: String
+    let type: String
+    let subtype: String
+    let color: String
+    let pattern: String?
+    let material: String?
+    let brand: String?
+    let size: String?
+    let weatherSuitability: String?
+    let occasion: [String]
+    let genderPresenting: String
+    let lastWorn: String
+    let imageConfidenceScore: Double?
+    let images: [String: String]
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case userUuid = "user_uuid"
+        case type, subtype, color, pattern, material, brand, size
+        case weatherSuitability = "weather_suitability"
+        case occasion
+        case genderPresenting = "gender_presenting"
+        case lastWorn = "last_worn"
+        case imageConfidenceScore = "image_confidence_score"
+        case images
+    }
+}
+
+
+// /save-clothing
+struct ClothingItemRequest: Codable {
+    let frontImage: String
+    let backImage: String?
+    let tagImage: String?
+
+    enum CodingKeys: String, CodingKey {
+        case frontImage = "front_image"
+        case backImage = "back_image"
+        case tagImage = "tag_image"
+    }
+}
+
+struct SaveClothingResponse: Codable {
+    let itemId: String
+    let message: String
+    let analysis: AnalysisResult
+
+    enum CodingKeys: String, CodingKey {
+        case itemId = "item_id"
+        case message, analysis
+    }
+}
+
+struct AnalysisResult: Codable {
+    let type: String
+    let subtype: String
+    let color: String
+    let pattern: String?
+    let material: String?
+    let brand: String?
+    let size: String?
+    let weatherSuitability: String?
+    let occasion: [String]
+    let genderPresenting: String
+
+    enum CodingKeys: String, CodingKey {
+        case type, subtype, color, pattern, material, brand, size
+        case weatherSuitability = "weather_suitability"
+        case occasion
+        case genderPresenting = "gender_presenting"
+    }
+}

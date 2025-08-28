@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ClothingItem: Identifiable {
-    let id = UUID()
+    let id: String
     let category: String
     let name: String
     let size: String

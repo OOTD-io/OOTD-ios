@@ -8,221 +8,82 @@
 import SwiftUI
 
 struct ClosetView: View {
-    @State private var selectedItem: ClothingItem? = nil
-//    @StateObject private var locationManager = LocationManager()
-//    @StateObject private var weatherManager = WeatherManager()
+    @ObservedObject var viewModel: ClosetViewModel
 
-    
     var body: some View {
-//        NavigationStack {
-//            ScrollView() {
-                VStack {
-                    //                HStack {
-                    //                    Text("Generate Outfit")
-                    //                        .font(.largeTitle)
-                    //                        .frame(width: 200, height: 200)
-                    //                        .background(.red)
-                    //
-                    //                    Text("Weather")
-                    //                        .font(.largeTitle)
-                    //                        .frame(width: 200, height: 200)
-                    //                        .background(.red)
-                    //                }
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        VStack(alignment: .leading) {
-                            HStack {
-                                Spacer()
-                                Text("Suggested Outfits")
-                                    .font(.title)
-                                    .fontWeight(.bold)
-                                Spacer()
-                            }
-                            
-                            
-                            ForEach(0..<2) { index in
+        VStack {
+            if viewModel.isLoading {
+                ProgressView("Loading your closet...")
+            } else if let errorMessage = viewModel.errorMessage {
+                Text(errorMessage)
+                    .foregroundColor(.red)
+            } else {
+                ScrollView {
+                    VStack {
+                        // Suggested Outfits (we'll implement this later)
+                        HStack {
+                            Spacer()
+                            VStack(alignment: .leading) {
                                 HStack {
                                     Spacer()
-                                    ForEach(index..<index+2) { i1 in
-                                        Text("Generated Outfit \(index)")
-                                            .font(.largeTitle)
-                                            .frame(width: 150, height: 150)
-                                            .background(.red)
-                                        Spacer()
-                                    }
+                                    Text("Suggested Outfits")
+                                        .font(.title)
+                                        .fontWeight(.bold)
                                     Spacer()
                                 }
                             }
-                            
+                            Spacer()
                         }
-                        //                    Spacer()
-                        //                    Text("Generated Outfit")
-                        //                        .font(.largeTitle)
-                        //                        .frame(width: 150, height: 150)
-                        //                        .background(.red)
-                        //                    Spacer()
-                        //                    Text("Saved Outfits")
-                        //                        .font(.largeTitle)
-                        //                        .frame(width: 150, height: 150)
-                        //                        .background(.red)
-                        //                    Spacer()
+
+                        // Clothing sections
+                        clothingSection(title: "👕 Tops", category: "tops")
+                        clothingSection(title: "👖 Bottoms", category: "bottoms")
+                        clothingSection(title: "👟 Shoes", category: "shoes")
                     }
-                    HStack {
-                        Spacer()
-                        VStack(alignment: .leading) {
-                            let item = ClothingItem(category: "Tops", name: "Shirt", size: "Medium", image: Image(systemName: "tshirt"), sceneImage: "harry_potter_uniform.scn")
-                            HStack {
-                                
-                                Text("👕 Tops")
-                                    .font(.title)
-                                    .fontWeight(.bold)
-                                Spacer()
-                                Spacer()
-                                Spacer()
-                                NavigationLink("See All →") {
-                                    ClothingListView(title: "tops", items: [item])
-                                }
-                                .font(.subheadline)
-                                .padding(EdgeInsets(top: 15, leading: 0, bottom: 0, trailing: 10))
-                                .background(Color.clear)
-                                .foregroundColor(.black)
-                                .cornerRadius(10)
-                                
-                            }
-                            
-                            ScrollView(.horizontal) {
-                                HStack(spacing: 20) {
-                                    ForEach(0..<5) { index in
-                                        ClothingNavigationTile(clothing: item, isLarge: false)
-                                        
-//                                        NavigationLink(destination: ClothingDetailView(clothing: item)) {
-//                                            ClothingTile(clothing: item)
-//                                        }
-//                                        ClothingTile(item: item)
-//                                            .onTapGesture {
-//                                            selectedItem = item
-//                                        }
-                                        //                                    Text("Item \(index)")
-                                        //                                        .font(.largeTitle)
-                                        //                                        .frame(width: 100, height: 100)
-                                        //                                        .background(.red)
-                                    }
-                                }
-                                
-                            }
-                        }
-                    }
-                    .padding(EdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 0))
-                    
-                    HStack {
-                        Spacer()
-                        VStack(alignment: .leading) {
-                            let item = ClothingItem(category: "Bottoms", name: "jeans", size: "32", image: Image(systemName: "figure.walk"), sceneImage: nil)
-                            HStack{
-                                Text("👖 Bottoms")
-                                    .font(.title)
-                                    .fontWeight(.bold)
-                                
-                                Spacer()
-                                Spacer()
-                                Spacer()
-                                NavigationLink("See All →") {
-                                    ClothingListView(title: "bottoms", items: [item])
-                                }
-                                .font(.subheadline)
-                                .padding(EdgeInsets(top: 15, leading: 0, bottom: 0, trailing: 10))
-                                .background(Color.clear)
-                                .foregroundColor(.black)
-                                .cornerRadius(10)
-                                //                            NavigationLink(action: {
-                                //                                ClothingListView(title: "bottoms", items: [item])
-                                //                            }) {
-                                //                                Text("See All →")
-                                //                                    .font(.subheadline)
-                                //                                    .padding(EdgeInsets(top: 15, leading: 0, bottom: 0, trailing: 10))
-                                //                                    .background(Color.clear)
-                                //                                    .foregroundColor(.black)
-                                //                                    .cornerRadius(10)
-                                //                            }
-                            }
-                            
-                            ScrollView(.horizontal) {
-                                HStack(spacing: 20) {
-                                    
-                                    ForEach(0..<5) { index in
-                                        ClothingNavigationTile(clothing: item, isLarge: false)
-//                                        NavigationLink(destination: ClothingDetailView(clothing: item)) {
-//                                            ClothingTile(clothing: item)
-//                                        }
-//                                        ClothingTile(item: item)
-//                                            .onTapGesture {
-//                                                selectedItem = item
-//                                            }
-                                    }
-                                }
-                                
-                            }
-                        }
-                    }
-                    .padding(EdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 0))
-                    
-                    
-                    HStack {
-                        Spacer()
-                        VStack(alignment: .leading) {
-                            let item = ClothingItem(category:  "Shoes", name: "Sneakers", size: "10", image: Image(systemName: "shoeprints.fill"), sceneImage: nil)
-                            HStack{
-                                Text("👟 Shoes")
-                                    .font(.title)
-                                    .fontWeight(.bold)
-                                
-                                Spacer()
-                                Spacer()
-                                Spacer()
-                                NavigationLink("See All →") {
-                                    ClothingListView(title: "bottoms", items: [item])
-                                }
-                                .font(.subheadline)
-                                .padding(EdgeInsets(top: 15, leading: 0, bottom: 0, trailing: 10))
-                                .background(Color.clear)
-                                .foregroundColor(.black)
-                                .cornerRadius(10)
-                            }
-                            
-                            ScrollView(.horizontal) {
-                                HStack(spacing: 20) {
-                                    ForEach(0..<5) { index in
-                                        ClothingNavigationTile(clothing: item, isLarge: false)
-//                                        NavigationLink(destination: ClothingDetailView(clothing: item)) {
-//                                            ClothingTile(clothing: item)
-//                                        }
-//                                        ClothingTile(item: item)
-//                                            .onTapGesture {
-//                                                selectedItem = item
-//                                            }
-                                    }
-                                }
-                                
-                            }
-                        }
-                    }
-                    .padding(EdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 0))
-                    
-                    
-                    Spacer()
-                    
                 }
-//            }
-            .padding(EdgeInsets(top: 0, leading: 0, bottom: 50, trailing: 0))
-//        }
-//        .navigationTitle("FUCK ME")
-//        .fullScreenCover(item: $selectedItem, onDismiss: .none) { item in
-//            ClothingDetailView(item: item)
-//        }
+            }
+        }
+        .onAppear {
+            Task {
+                await viewModel.fetchClothes()
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func clothingSection(title: String, category: String) -> some View {
+        let items = viewModel.clothingItems.filter { $0.category.lowercased() == category }
+
+        if !items.isEmpty {
+            VStack(alignment: .leading) {
+                HStack {
+                    Text(title)
+                        .font(.title)
+                        .fontWeight(.bold)
+                    Spacer()
+                    NavigationLink("See All →") {
+                        ClothingListView(title: title, items: items)
+                    }
+                    .font(.subheadline)
+                    .padding(.trailing, 10)
+                    .foregroundColor(.black)
+                }
+                .padding(.leading, 15)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 20) {
+                        ForEach(items) { item in
+                            ClothingNavigationTile(clothing: item, isLarge: false)
+                        }
+                    }
+                    .padding(.horizontal, 15)
+                }
+            }
+            .padding(.vertical, 10)
+        }
     }
 }
 
 #Preview {
-    ClosetView()
+    ClosetView(viewModel: ClosetViewModel())
 }
