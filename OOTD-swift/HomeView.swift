@@ -49,7 +49,7 @@ struct HomeView<Content>: View where Content: View{
                             } else {
                                 Button(action: {
                                     Task {
-                                        await homeViewModel.generateOutfits(weather: weather.weather.first?.description ?? "")
+                                        await homeViewModel.generateOutfits(weather: weather.condition.description)
                                     }
                                 }) {
                                     Text("Generate Outfit")
