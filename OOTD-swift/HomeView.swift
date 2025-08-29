@@ -66,11 +66,7 @@ struct HomeView<Content>: View where Content: View{
                             Text("Loading weather…")
                                 .foregroundColor(.gray)
                                 .onAppear {
-                                    if let loc = locationManager.location {
-                                        Task {
-                                            await weatherManager.fetchWeather(for: loc)
-                                        }
-                                    }
+                                    locationManager.requestLocationPermission()
                                 }
                         }
                         ClosetView(viewModel: closetViewModel)

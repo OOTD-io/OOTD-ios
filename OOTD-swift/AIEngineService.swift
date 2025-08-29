@@ -12,7 +12,7 @@ class AIEngineService {
     }
 
     func generateOutfit(weather: String) async throws -> GenerateOutfitResponse {
-        let url = baseURL.appendingPathComponent("/generate")
+        let url = baseURL.appendingPathComponent("/api/outfits/generate")
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -33,7 +33,7 @@ class AIEngineService {
     }
 
     func getClothes() async throws -> GetClothesResponse {
-        let url = baseURL.appendingPathComponent("/clothes")
+        let url = baseURL.appendingPathComponent("/api/outfits/clothes")
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
 
@@ -50,7 +50,7 @@ class AIEngineService {
     }
 
     func saveClothing(item: ClothingItemRequest) async throws -> SaveClothingResponse {
-        let url = baseURL.appendingPathComponent("/save-clothing")
+        let url = baseURL.appendingPathComponent("/api/outfits/save-clothing")
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
