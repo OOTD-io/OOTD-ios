@@ -46,7 +46,12 @@ class AIEngineService {
             throw APIError.serverError
         }
 
-        return try JSONDecoder().decode(GetClothesResponse.self, from: data)
+        do {
+            return try JSONDecoder().decode(GetClothesResponse.self, from: data)
+        } catch let decodingError {
+            print("Decoding error in getClothes: \(decodingError)")
+            throw APIError.decodingError
+        }
     }
 
     func saveClothing(item: ClothingItemRequest) async throws -> SaveClothingResponse {
@@ -68,7 +73,12 @@ class AIEngineService {
             throw APIError.serverError
         }
 
-        return try JSONDecoder().decode(SaveClothingResponse.self, from: data)
+        do {
+            return try JSONDecoder().decode(SaveClothingResponse.self, from: data)
+        } catch let decodingError {
+            print("Decoding error in saveClothing: \(decodingError)")
+            throw APIError.decodingError
+        }
     }
 }
 
@@ -130,9 +140,9 @@ struct ClothingItemDTO: Codable, Identifiable {
     let brand: String?
     let size: String?
     let weatherSuitability: String?
-    let occasion: [String]
-    let genderPresenting: String
-    let lastWorn: String
+    let occasion: [String]?
+    let genderPresenting: String?
+    let lastWorn: String?
     let imageConfidenceScore: Double?
     let images: [String: String]
 

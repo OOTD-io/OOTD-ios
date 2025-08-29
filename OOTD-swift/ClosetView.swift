@@ -36,9 +36,11 @@ struct ClosetView: View {
                         }
 
                         // Clothing sections
-                        clothingSection(title: "👕 Tops", category: "tops")
-                        clothingSection(title: "👖 Bottoms", category: "bottoms")
-                        clothingSection(title: "👟 Shoes", category: "shoes")
+                        clothingSection(title: "👕 Tops", category: .tops)
+                        clothingSection(title: "👖 Bottoms", category: .bottoms)
+                        clothingSection(title: "👟 Shoes", category: .shoes)
+                        clothingSection(title: "🧥 Outerwear", category: .outerwear)
+                        clothingSection(title: "👜 Accessories", category: .accessories)
                     }
                 }
             }
@@ -51,8 +53,8 @@ struct ClosetView: View {
     }
 
     @ViewBuilder
-    private func clothingSection(title: String, category: String) -> some View {
-        let items = viewModel.clothingItems.filter { $0.category.lowercased() == category }
+    private func clothingSection(title: String, category: ClothingCategory) -> some View {
+        let items = viewModel.clothingItems.filter { $0.uiCategory == category }
 
         if !items.isEmpty {
             VStack(alignment: .leading) {
