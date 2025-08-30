@@ -31,15 +31,16 @@ struct HomeView<Content>: View where Content: View {
                                 await closetViewModel.fetchClothes()
                             }
                         }
-                        .task(id: locationManager.location) { location in
-                            // When location changes, fetch the weather.
-                            if let location = location {
+                        .task(id: locationManager.location) {
+                            // This version of .task does not take a parameter.
+                            // We read the property from the @StateObject directly.
+                            if let location = locationManager.location {
                                 await weatherManager.fetchWeather(for: location)
                             }
                         }
-                        .task(id: weatherManager.currentWeather) { weather in
-                            // When weather changes, generate outfits.
-                            if let weather = weather {
+                        .task(id: weatherManager.currentWeather) {
+                            // This version of .task does not take a parameter.
+                            if let weather = weatherManager.currentWeather {
                                 let weatherRequest = WeatherRequest(
                                     temperature: weather.temperature.converted(to: .fahrenheit).value,
                                     condition: weather.condition.description
