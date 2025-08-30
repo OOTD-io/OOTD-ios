@@ -115,6 +115,17 @@ struct Outfit: Codable {
     let accessories: [String]
 }
 
+struct TemperatureRange: Codable {
+    let min: Double?
+    let max: Double?
+}
+
+struct WeatherSuitability: Codable {
+    let temperature: TemperatureRange?
+    let conditions: [String]?
+    let seasons: [String]?
+}
+
 // /clothes
 struct GetClothesResponse: Codable {
     let clothes: [ClothingItemDTO]
@@ -139,7 +150,7 @@ struct ClothingItemDTO: Codable, Identifiable {
     let material: String?
     let brand: String?
     let size: String?
-    let weatherSuitability: String?
+    let weatherSuitability: WeatherSuitability?
     let occasion: [String]?
     let genderPresenting: String?
     let lastWorn: String?
@@ -192,7 +203,7 @@ struct AnalysisResult: Codable {
     let material: String?
     let brand: String?
     let size: String?
-    let weatherSuitability: String?
+    let weatherSuitability: WeatherSuitability?
     let occasion: [String]
     let genderPresenting: String
 
