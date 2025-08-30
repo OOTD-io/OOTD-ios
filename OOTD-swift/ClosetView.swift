@@ -1,53 +1,58 @@
-//
-//  ClosetView.swift
-//  OOTD-swift
-//
-//  Created by Rahqi Sarsour on 6/15/25.
-//
-
 import SwiftUI
+import WeatherKit
 
 struct ClosetView: View {
     @ObservedObject var viewModel: ClosetViewModel
+    let weather: CurrentWeather?
 
     var body: some View {
-        VStack {
-            if viewModel.isLoading {
-                ProgressView("Loading your closet...")
-            } else if let errorMessage = viewModel.errorMessage {
-                Text(errorMessage)
-                    .foregroundColor(.red)
-            } else {
-                ScrollView {
-                    VStack {
-                        // Suggested Outfits (we'll implement this later)
-                        HStack {
-                            Spacer()
-                            VStack(alignment: .leading) {
-                                HStack {
-                                    Spacer()
-                                    Text("Suggested Outfits")
-                                        .font(.title)
-                                        .fontWeight(.bold)
-                                    Spacer()
-                                }
-                            }
-                            Spacer()
-                        }
+        ScrollView {
+            VStack {
+                // 1. Weather Section
+                if let weather = weather {
+                    WeatherCard(weather: weather)
+                        .padding()
+                } else {
+                    // A placeholder while weather is loading
+                    HStack {
+                        Text("Loading Weather...")
+                        ProgressView()
+                    }
+                    .padding()
+                }
 
-                        // Clothing sections
-                        clothingSection(title: "👕 Tops", category: .tops)
-                        clothingSection(title: "👖 Bottoms", category: .bottoms)
-                        clothingSection(title: "👟 Shoes", category: .shoes)
-                        clothingSection(title: "🧥 Outerwear", category: .outerwear)
-                        clothingSection(title: "👜 Accessories", category: .accessories)
+                // 2. Generated Outfits Section
+                if viewModel.isLoadingOutfits {
+                    ProgressView("Generating Outfits...")
+                } else if !viewModel.outfitViewModels.isEmpty {
+                    VStack(alignment: .leading) {
+                        Text("Generated Outfits")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .padding(.horizontal)
+
+                        // Grid for outfits
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 150))], spacing: 20) {
+                            ForEach(viewModel.outfitViewModels) { outfitVM in
+                                OutfitTileView(outfitViewModel: outfitVM)
+                            }
+                        }
+                        .padding()
                     }
                 }
-            }
-        }
-        .onAppear {
-            Task {
-                await viewModel.fetchClothes()
+
+                // 3. Individual Clothing Sections
+                if let errorMessage = viewModel.errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .padding()
+                } else {
+                    clothingSection(title: "👕 Tops", category: .tops)
+                    clothingSection(title: "👖 Bottoms", category: .bottoms)
+                    clothingSection(title: "👟 Shoes", category: .shoes)
+                    clothingSection(title: "🧥 Outerwear", category: .outerwear)
+                    clothingSection(title: "👜 Accessories", category: .accessories)
+                }
             }
         }
     }
@@ -60,7 +65,7 @@ struct ClosetView: View {
             VStack(alignment: .leading) {
                 HStack {
                     Text(title)
-                        .font(.title)
+                        .font(.title2)
                         .fontWeight(.bold)
                     Spacer()
                     NavigationLink("See All →") {
@@ -68,9 +73,8 @@ struct ClosetView: View {
                     }
                     .font(.subheadline)
                     .padding(.trailing, 10)
-                    .foregroundColor(.black)
                 }
-                .padding(.leading, 15)
+                .padding(.horizontal)
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 20) {
@@ -78,7 +82,7 @@ struct ClosetView: View {
                             ClothingNavigationTile(clothing: item, isLarge: false)
                         }
                     }
-                    .padding(.horizontal, 15)
+                    .padding(.horizontal)
                 }
             }
             .padding(.vertical, 10)
@@ -87,5 +91,5 @@ struct ClosetView: View {
 }
 
 #Preview {
-    ClosetView(viewModel: ClosetViewModel())
+    ClosetView(viewModel: ClosetViewModel(), weather: nil)
 }

@@ -8,15 +8,9 @@
 import SwiftUI
 import AuthenticationServices
 
-
-
-struct HomeView<Content>: View where Content: View{
-    @StateObject private var viewModel = AuthenticationViewModel()
-    @StateObject private var homeViewModel = HomeViewModel()
+struct HomeView<Content>: View where Content: View {
+    @StateObject private var authViewModel = AuthenticationViewModel()
     @StateObject private var closetViewModel = ClosetViewModel()
-
-    @State private var presentingLoginScreen = false
-    @State private var presentingProfileScreen = false
     @StateObject private var locationManager = LocationManager()
     @StateObject private var weatherManager = WeatherManager()
     
@@ -28,10 +22,7 @@ struct HomeView<Content>: View where Content: View{
     
     @State private var selectedTab: Tab = .closet
 
-
-
     var body: some View {
-        
         ZStack(alignment: .bottom) {
             content()
 
@@ -39,45 +30,28 @@ struct HomeView<Content>: View where Content: View{
             Group {
                 switch selectedTab {
                 case .closet:
-                    ScrollView() {
-                        if let weather = weatherManager.currentWeather {
-                            WeatherCard(weather: weather)
-                                .padding(.vertical, 8)
-
-                            if homeViewModel.isLoading {
-                                ProgressView("Generating your outfit...")
-                            } else {
-                                Button(action: {
-                                    Task {
-                                        await homeViewModel.generateOutfits(weather: weather.condition.description)
-                                    }
-                                }) {
-                                    Text("Generate Outfit")
-                                        .fontWeight(.semibold)
-                                        .frame(minWidth: 0, maxWidth: .infinity)
-                                        .padding()
-                                        .background(Color.green)
-                                        .foregroundColor(.white)
-                                        .cornerRadius(10)
-                                }
-                                .padding(.horizontal)
+                    ClosetView(viewModel: closetViewModel, weather: weatherManager.currentWeather)
+                        .onAppear {
+                            // First, request location permission. This starts the weather flow.
+                            locationManager.requestLocationPermission()
+                            // Immediately fetch the user's saved clothes.
+                            Task {
+                                await closetViewModel.fetchClothes()
                             }
-                        } else {
-                            Text("Loading weather…")
-                                .foregroundColor(.gray)
-                                .onAppear {
-                                    locationManager.requestLocationPermission()
-                                }
                         }
-                        ClosetView(viewModel: closetViewModel)
-                    }
+                        .task(id: weatherManager.currentWeather) {
+                            // When weather changes (and is not nil), generate outfits.
+                            if let weather = weatherManager.currentWeather {
+                                await closetViewModel.generateOutfits(weather: weather.condition.description)
+                            }
+                        }
                     
                 case .add:
                     ClothingUploadView()
                 case .profile:
                     NavigationView {
-                      UserProfileView()
-                        .environmentObject(viewModel)
+                        UserProfileView()
+                            .environmentObject(authViewModel)
                     }
                 }
             }
@@ -102,7 +76,6 @@ struct HomeView<Content>: View where Content: View{
                 Spacer()
 
                 Button(action: {
-                    
                     selectedTab = .add
                 }) {
                     ZStack {
@@ -141,9 +114,6 @@ struct HomeView<Content>: View where Content: View{
             .background(Color.white.ignoresSafeArea(edges: .bottom))
             .shadow(color: .gray.opacity(0.2), radius: 5, y: -2)
             .offset(y:30)
-        }
-        .sheet(isPresented: $homeViewModel.shouldShowOutfits) {
-            OutfitView(outfits: homeViewModel.generatedOutfits, closetViewModel: closetViewModel)
         }
     }
 }
