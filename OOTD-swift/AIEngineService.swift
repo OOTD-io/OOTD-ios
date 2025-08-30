@@ -27,9 +27,12 @@ class AIEngineService {
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 201 else {
-            // Enhanced error logging
             let errorDetail = String(data: data, encoding: .utf8)
-            print("Error response from generateOutfit: \(httpResponse.statusCode) - \(errorDetail ?? "No details")")
+            if let response = response as? HTTPURLResponse {
+                print("Error response from generateOutfit: \(response.statusCode) - \(errorDetail ?? "No details")")
+            } else {
+                print("Error response from generateOutfit: Invalid response type - \(errorDetail ?? "No details")")
+            }
             throw APIError.serverError
         }
 
