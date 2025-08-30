@@ -4,34 +4,16 @@ struct OutfitTileView: View {
     let outfitViewModel: OutfitViewModel
 
     var body: some View {
-        VStack {
-            // Display the first item from each category.
-            // The underlying model now supports multiple items, so this
-            // could be updated to a carousel or ZStack in the future.
-
-            if let topItem = outfitViewModel.tops.first {
-                topItem.image
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: 80)
-            }
-
-            if let bottomItem = outfitViewModel.bottoms.first {
-                bottomItem.image
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: 60)
-            }
-
-            if let shoeItem = outfitViewModel.shoes.first {
-                shoeItem.image
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: 40)
-            }
+        AsyncImage(url: outfitViewModel.compositeImageUrl) { image in
+            image
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+        } placeholder: {
+            ProgressView()
         }
-        .padding()
+        .frame(minHeight: 150) // Give it a reasonable size
         .background(Color.gray.opacity(0.1))
         .cornerRadius(10)
+        .clipped()
     }
 }

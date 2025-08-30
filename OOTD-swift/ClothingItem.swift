@@ -21,7 +21,7 @@ struct ClothingItem: Identifiable {
     let category: String // This comes from the API's 'type' field
     let name: String
     let size: String
-    let image: Image
+    let imageURL: URL?
     let sceneImage: String?
 
     var uiCategory: ClothingCategory {

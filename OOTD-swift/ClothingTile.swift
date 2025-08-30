@@ -22,14 +22,17 @@ struct ClothingTile: View {
                 //                .padding()
                 //                .background(.clear)
             } else {
-                item.image
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: isLarge ? 140 : 100, height: isLarge ? 140 : 100)
-                    .background(Color.gray.opacity(0.2))
-                    .clipped()
-                    .cornerRadius(12)
-
+                AsyncImage(url: item.imageURL) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                } placeholder: {
+                    ProgressView()
+                }
+                .frame(width: isLarge ? 140 : 100, height: isLarge ? 140 : 100)
+                .background(Color.gray.opacity(0.2))
+                .clipped()
+                .cornerRadius(12)
             }
 //            item.image
 //                .resizable()

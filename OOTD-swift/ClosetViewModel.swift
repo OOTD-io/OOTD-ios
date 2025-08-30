@@ -8,7 +8,7 @@ class ClosetViewModel: ObservableObject {
             mapOutfits()
         }
     }
-    @Published var generatedOutfits = [Outfit]() {
+    @Published var generatedOutfitsDTOs = [OutfitResponseDTO]() {
         didSet {
             mapOutfits()
         }
@@ -27,20 +27,17 @@ class ClosetViewModel: ObservableObject {
             let response = try await AIEngineService.shared.getClothes()
             var items = [ClothingItem]()
             for dto in response.clothes {
-                if let base64String = dto.images["front"],
-                   let data = Data(base64Encoded: base64String),
-                   let uiImage = UIImage(data: data) {
+                let imageURL = URL(string: dto.images["front"] ?? "")
 
-                    let item = ClothingItem(
-                        id: dto.id,
-                        category: dto.type,
-                        name: dto.subtype,
-                        size: dto.size ?? "N/A",
-                        image: Image(uiImage: uiImage),
-                        sceneImage: nil
-                    )
-                    items.append(item)
-                }
+                let item = ClothingItem(
+                    id: dto.id,
+                    category: dto.type,
+                    name: dto.subtype,
+                    size: dto.size ?? "N/A",
+                    imageURL: imageURL,
+                    sceneImage: nil
+                )
+                items.append(item)
             }
             self.clothingItems = items
         } catch {
@@ -51,11 +48,11 @@ class ClosetViewModel: ObservableObject {
         isLoadingClothes = false
     }
 
-    func generateOutfits(weather: String) async {
+    func generateOutfits(weather: WeatherRequest) async {
         isLoadingOutfits = true
         do {
             let response = try await AIEngineService.shared.generateOutfit(weather: weather)
-            self.generatedOutfits = response.outfits
+            self.generatedOutfitsDTOs = response.outfits
         } catch {
             print("Error generating outfits: \(error)")
         }
@@ -63,21 +60,26 @@ class ClosetViewModel: ObservableObject {
     }
 
     private func mapOutfits() {
+        guard !clothingItems.isEmpty else { return }
         let clothingDict = Dictionary(uniqueKeysWithValues: clothingItems.map { ($0.id, $0) })
 
-        let newViewModels = generatedOutfits.map { outfit -> OutfitViewModel in
-            let tops = outfit.tops.compactMap { clothingDict[$0] }
-            let bottoms = outfit.bottoms.compactMap { clothingDict[$0] }
-            let shoes = outfit.shoes.compactMap { clothingDict[$0] }
-            let outerwear = outfit.outerwear.compactMap { clothingDict[$0] }
-            let accessories = outfit.accessories.compactMap { clothingDict[$0] }
+        let newViewModels = generatedOutfitsDTOs.map { dto -> OutfitViewModel in
+            let items = dto.clothingItemIds.compactMap { clothingDict[$0] }
+
+            let tops = items.filter { $0.uiCategory == .tops }
+            let bottoms = items.filter { $0.uiCategory == .bottoms }
+            let shoes = items.filter { $0.uiCategory == .shoes }
+            let outerwear = items.filter { $0.uiCategory == .outerwear }
+            let accessories = items.filter { $0.uiCategory == .accessories }
 
             return OutfitViewModel(
+                id: dto.id,
                 tops: tops,
                 bottoms: bottoms,
                 shoes: shoes,
                 outerwear: outerwear,
-                accessories: accessories
+                accessories: accessories,
+                compositeImageUrl: URL(string: dto.imageUrl)
             )
         }
 

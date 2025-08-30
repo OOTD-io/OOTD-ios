@@ -11,7 +11,8 @@ class AIEngineService {
         return session.accessToken
     }
 
-    func generateOutfit(weather: String) async throws -> GenerateOutfitResponse {
+    // UPDATED
+    func generateOutfit(weather: WeatherRequest) async throws -> GenerateOutfitResponse {
         let url = baseURL.appendingPathComponent("/api/outfits/generate")
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -26,26 +27,30 @@ class AIEngineService {
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 201 else {
+            // Enhanced error logging
+            let errorDetail = String(data: data, encoding: .utf8)
+            print("Error response from generateOutfit: \(httpResponse.statusCode) - \(errorDetail ?? "No details")")
             throw APIError.serverError
         }
 
-        return try JSONDecoder().decode(GenerateOutfitResponse.self, from: data)
+        do {
+            return try JSONDecoder().decode(GenerateOutfitResponse.self, from: data)
+        } catch let decodingError {
+            print("Decoding error in generateOutfit: \(decodingError)")
+            throw APIError.decodingError
+        }
     }
 
     func getClothes() async throws -> GetClothesResponse {
         let url = baseURL.appendingPathComponent("/api/outfits/clothes")
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-
         let accessToken = try await getAccessToken()
         request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-
         let (data, response) = try await URLSession.shared.data(for: request)
-
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             throw APIError.serverError
         }
-
         do {
             return try JSONDecoder().decode(GetClothesResponse.self, from: data)
         } catch let decodingError {
@@ -59,20 +64,15 @@ class AIEngineService {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
         let accessToken = try await getAccessToken()
         request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-
         request.httpBody = try JSONEncoder().encode(item)
-
         let (data, response) = try await URLSession.shared.data(for: request)
-
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 201 else {
             let errorDetail = String(data: data, encoding: .utf8)
             print("Error response from server: \(errorDetail ?? "No details")")
             throw APIError.serverError
         }
-
         do {
             return try JSONDecoder().decode(SaveClothingResponse.self, from: data)
         } catch let decodingError {
@@ -90,15 +90,37 @@ enum APIError: Error {
     case decodingError
 }
 
-// /generate
+// MARK: - /generate Models (UPDATED)
+struct WeatherRequest: Codable {
+    let temperature: Double
+    let condition: String
+}
+
 struct GenerateOutfitRequest: Codable {
-    let weather: String
+    let weather: WeatherRequest
+}
+
+struct OutfitResponseDTO: Codable, Identifiable {
+    var id: String { clothingItemIds.joined(separator: "-") } // Create a stable ID
+    let category: String
+    let clothingItemIds: [String]
+    let imageUrl: String
+    let imagePath: String
+    let individualItemImages: [String]
+
+    enum CodingKeys: String, CodingKey {
+        case category
+        case clothingItemIds = "clothing_item_ids"
+        case imageUrl = "image_url"
+        case imagePath = "image_path"
+        case individualItemImages = "individual_item_images"
+    }
 }
 
 struct GenerateOutfitResponse: Codable {
     let userId: String
     let totalOutfitsGenerated: Int
-    let outfits: [Outfit]
+    let outfits: [OutfitResponseDTO]
 
     enum CodingKeys: String, CodingKey {
         case userId = "user_id"
@@ -107,26 +129,15 @@ struct GenerateOutfitResponse: Codable {
     }
 }
 
-struct Outfit: Codable {
-    let tops: [String]
-    let bottoms: [String]
-    let shoes: [String]
-    let outerwear: [String]
-    let accessories: [String]
-}
-
-struct TemperatureRange: Codable {
-    let min: Double?
-    let max: Double?
-}
-
+// MARK: - Shared Models (UPDATED)
 struct WeatherSuitability: Codable {
-    let temperature: TemperatureRange?
-    let conditions: [String]?
-    let seasons: [String]?
+    let hot: Bool
+    let warm: Bool
+    let cool: Bool
+    let cold: Bool
 }
 
-// /clothes
+// MARK: - /clothes Models
 struct GetClothesResponse: Codable {
     let clothes: [ClothingItemDTO]
     let totalCount: Int
@@ -139,7 +150,6 @@ struct GetClothesResponse: Codable {
     }
 }
 
-// This is the model for the clothing item returned by the API
 struct ClothingItemDTO: Codable, Identifiable {
     let id: String
     let userUuid: String
@@ -150,12 +160,12 @@ struct ClothingItemDTO: Codable, Identifiable {
     let material: String?
     let brand: String?
     let size: String?
-    let weatherSuitability: WeatherSuitability?
+    let weatherSuitability: WeatherSuitability? // UPDATED
     let occasion: [String]?
     let genderPresenting: String?
     let lastWorn: String?
     let imageConfidenceScore: Double?
-    let images: [String: String]
+    let images: [String: String] // These are URLs
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -170,8 +180,7 @@ struct ClothingItemDTO: Codable, Identifiable {
     }
 }
 
-
-// /save-clothing
+// MARK: - /save-clothing Models
 struct ClothingItemRequest: Codable {
     let frontImage: String
     let backImage: String?
@@ -184,17 +193,6 @@ struct ClothingItemRequest: Codable {
     }
 }
 
-struct SaveClothingResponse: Codable {
-    let itemId: String
-    let message: String
-    let analysis: AnalysisResult
-
-    enum CodingKeys: String, CodingKey {
-        case itemId = "item_id"
-        case message, analysis
-    }
-}
-
 struct AnalysisResult: Codable {
     let type: String
     let subtype: String
@@ -203,7 +201,7 @@ struct AnalysisResult: Codable {
     let material: String?
     let brand: String?
     let size: String?
-    let weatherSuitability: WeatherSuitability?
+    let weatherSuitability: WeatherSuitability? // UPDATED
     let occasion: [String]
     let genderPresenting: String
 
@@ -212,5 +210,16 @@ struct AnalysisResult: Codable {
         case weatherSuitability = "weather_suitability"
         case occasion
         case genderPresenting = "gender_presenting"
+    }
+}
+
+struct SaveClothingResponse: Codable {
+    let itemId: String
+    let message: String
+    let analysis: AnalysisResult
+
+    enum CodingKeys: String, CodingKey {
+        case itemId = "item_id"
+        case message, analysis
     }
 }

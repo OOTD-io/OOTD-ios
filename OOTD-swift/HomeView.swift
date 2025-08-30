@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AuthenticationServices
+import WeatherKit
 
 struct HomeView<Content>: View where Content: View {
     @StateObject private var authViewModel = AuthenticationViewModel()
@@ -42,7 +43,11 @@ struct HomeView<Content>: View where Content: View {
                         .task(id: weatherManager.currentWeather) {
                             // When weather changes (and is not nil), generate outfits.
                             if let weather = weatherManager.currentWeather {
-                                await closetViewModel.generateOutfits(weather: weather.condition.description)
+                                let weatherRequest = WeatherRequest(
+                                    temperature: weather.temperature.converted(to: .fahrenheit).value,
+                                    condition: weather.condition.description
+                                )
+                                await closetViewModel.generateOutfits(weather: weatherRequest)
                             }
                         }
                     
