@@ -81,12 +81,12 @@ class ClosetViewModel: ObservableObject {
         let newViewModels = generatedOutfitsDTOs.map { dto -> OutfitViewModel in
             let items = dto.clothingItemIds.compactMap { clothingDict[$0] }
 
-            let tops = items.filter { $0.uiCategory == .tops }
-            let bottoms = items.filter { $0.uiCategory == .bottoms }
+            let tops = items.filter { $0.uiCategory == .top }
+            let bottoms = items.filter { $0.uiCategory == .bottom }
             let dress = items.filter { $0.uiCategory == .dress }
             let shoes = items.filter { $0.uiCategory == .shoes }
             let outerwear = items.filter { $0.uiCategory == .outerwear }
-            let accessories = items.filter { $0.uiCategory == .accessories }
+            let accessories = items.filter { $0.uiCategory == .accessory }
 
             return OutfitViewModel(
                 id: dto.id,
