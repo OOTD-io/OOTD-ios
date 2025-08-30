@@ -1,11 +1,3 @@
-//
-//  LocationManager.swift
-//  OOTD-swift
-//
-//  Created by Rahqi Sarsour on 6/17/25.
-//
-
-
 import CoreLocation
 import Combine
 
@@ -13,17 +5,31 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let manager = CLLocationManager()
 
     @Published var location: CLLocation?
-    @Published var authorizationStatus: CLAuthorizationStatus = .notDetermined
+    @Published var authorizationStatus: CLAuthorizationStatus
 
     override init() {
+        self.authorizationStatus = manager.authorizationStatus
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
     }
 
     func requestLocationPermission() {
-        manager.requestWhenInUseAuthorization()
-        manager.requestLocation()
+        switch manager.authorizationStatus {
+        case .authorizedWhenInUse, .authorizedAlways:
+            // Permission already granted, just request the location.
+            manager.requestLocation()
+        case .notDetermined:
+            // Permission not yet requested, ask for it.
+            manager.requestWhenInUseAuthorization()
+        case .denied, .restricted:
+            // Permission denied or restricted.
+            // In a real app, we might want to show an alert guiding the user to settings.
+            print("Location permission is denied or restricted.")
+            break
+        @unknown default:
+            break
+        }
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -31,12 +37,15 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("Failed to get location: \(error)")
+        // Failing to get a location is common (e.g., in the simulator).
+        // We should handle this gracefully in the UI.
+        print("Failed to get location: \(error.localizedDescription)")
     }
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        authorizationStatus = manager.authorizationStatus
-        if authorizationStatus == .authorizedWhenInUse || authorizationStatus == .authorizedAlways {
+        self.authorizationStatus = manager.authorizationStatus
+        // If permission was just granted, request the location.
+        if manager.authorizationStatus == .authorizedWhenInUse || manager.authorizationStatus == .authorizedAlways {
             manager.requestLocation()
         }
     }
