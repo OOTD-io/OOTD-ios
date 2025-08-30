@@ -22,17 +22,13 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 
     func requestLocationPermission() {
-        print("[LocationManager] requestLocationPermission called.")
-        print("[LocationManager] Current status: \(manager.authorizationStatus.rawValue)")
         switch manager.authorizationStatus {
         case .authorizedWhenInUse, .authorizedAlways:
-            print("[LocationManager] Permission already granted. Requesting location.")
             manager.requestLocation()
         case .notDetermined:
-            print("[LocationManager] Permission not determined. Requesting authorization.")
             manager.requestWhenInUseAuthorization()
         case .denied, .restricted:
-            print("[LocationManager] Permission denied or restricted.")
+            print("Location permission is denied or restricted.")
             break
         @unknown default:
             break
@@ -40,7 +36,6 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        print("[LocationManager] Did update locations: \(locations.first?.coordinate.latitude ?? 0),\(locations.first?.coordinate.longitude ?? 0)")
         location = locations.first
     }
 

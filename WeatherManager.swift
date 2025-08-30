@@ -10,7 +10,6 @@ class WeatherManager: ObservableObject {
     @Published var errorMessage: String?
 
     func fetchWeather(for location: CLLocation) async {
-        print("[WeatherManager] Fetching weather for location: \(location.coordinate.latitude),\(location.coordinate.longitude)")
         errorMessage = nil
 
         do {

@@ -26,26 +26,25 @@ struct HomeView<Content>: View where Content: View {
                 case .closet:
                     ClosetView(viewModel: closetViewModel, weather: weatherManager.currentWeather, weatherError: weatherManager.errorMessage)
                         .onAppear {
-                            print("[HomeView] onAppear triggered. Requesting location and clothes.")
-                            // First, request location permission. This starts the weather flow.
                             locationManager.requestLocationPermission()
-                            // Immediately fetch the user's saved clothes.
                             Task {
                                 await closetViewModel.fetchClothes()
                             }
                         }
-                        .task(id: weatherManager.currentWeather) {
-                            print("[HomeView] weather task triggered.")
-                            // When weather changes (and is not nil), generate outfits.
-                            if let weather = weatherManager.currentWeather {
-                                print("[HomeView] Weather data is available, generating outfits.")
+                        .task(id: locationManager.location) { location in
+                            // When location changes, fetch the weather.
+                            if let location = location {
+                                await weatherManager.fetchWeather(for: location)
+                            }
+                        }
+                        .task(id: weatherManager.currentWeather) { weather in
+                            // When weather changes, generate outfits.
+                            if let weather = weather {
                                 let weatherRequest = WeatherRequest(
                                     temperature: weather.temperature.converted(to: .fahrenheit).value,
                                     condition: weather.condition.description
                                 )
                                 await closetViewModel.generateOutfits(weather: weatherRequest)
-                            } else {
-                                print("[HomeView] Weather data is nil.")
                             }
                         }
                     

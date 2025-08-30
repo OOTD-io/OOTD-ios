@@ -59,21 +59,15 @@ class ClosetViewModel: ObservableObject {
         isLoadingOutfits = true
         do {
             let response = try await AIEngineService.shared.generateOutfit(weather: weather)
-            print("[ClosetViewModel] Received \(response.outfits.count) outfits from API.")
             self.generatedOutfitsDTOs = response.outfits
         } catch {
-            print("[ClosetViewModel] Error generating outfits: \(error)")
+            print("Error generating outfits: \(error)")
         }
         isLoadingOutfits = false
     }
 
     private func mapOutfits() {
-        print("[ClosetViewModel] mapOutfits called.")
-        print("[ClosetViewModel] clothingItems count: \(clothingItems.count)")
-        print("[ClosetViewModel] generatedOutfitsDTOs count: \(generatedOutfitsDTOs.count)")
-
         guard !clothingItems.isEmpty else {
-            print("[ClosetViewModel] clothingItems is empty, cannot map outfits yet.")
             return
         }
         let clothingDict = Dictionary(uniqueKeysWithValues: clothingItems.map { ($0.id, $0) })
@@ -100,7 +94,6 @@ class ClosetViewModel: ObservableObject {
             )
         }
 
-        print("[ClosetViewModel] Created \(newViewModels.count) outfit view models.")
         self.outfitViewModels = newViewModels
     }
 }
