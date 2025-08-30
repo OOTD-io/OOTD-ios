@@ -90,7 +90,7 @@ class ClosetViewModel: ObservableObject {
                 shoes: shoes,
                 outerwear: outerwear,
                 accessories: accessories,
-                compositeImageUrl: URL(string: dto.imageUrl)
+                compositeImageUrl: URL(string: dto.imageUrl ?? "")
             )
         }
 

@@ -115,13 +115,15 @@ struct OutfitResponseDTO: Codable, Identifiable {
     var id: String { clothingItemIds.joined(separator: "-") }
     let category: String
     let clothingItemIds: [String]
-    let imageUrl: String
-    let imagePath: String
-    let individualItemImages: [String]
+    let imageUrl: String?
+    let imagePath: String?
+    let individualItemImages: [String]?
 
     enum CodingKeys: String, CodingKey {
-        case category, imageUrl, imagePath
+        case category
         case clothingItemIds = "clothing_item_ids"
+        case imageUrl = "image_url"
+        case imagePath = "image_path"
         case individualItemImages = "individual_item_images"
     }
 }
