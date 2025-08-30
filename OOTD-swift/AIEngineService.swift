@@ -1,3 +1,10 @@
+//
+//  AIEngineService.swift
+//  OOTD-swift
+//
+//  Created by Riyad Sarsour on 8/30/25.
+//
+
 import Foundation
 import Supabase
 
@@ -133,10 +140,10 @@ struct GenerateOutfitResponse: Codable {
 
 // MARK: - Shared Models
 struct WeatherSuitability: Codable {
-    let hot: Bool
-    let warm: Bool
-    let cool: Bool
-    let cold: Bool
+    let hot: Bool?
+    let warm: Bool?
+    let cool: Bool?
+    let cold: Bool?
 }
 
 // MARK: - /clothes Models

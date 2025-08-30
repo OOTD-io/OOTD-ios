@@ -1,3 +1,10 @@
+//
+//  OutfitViewModel.swift
+//  OOTD-swift
+//
+//  Created by Riyad Sarsour on 8/30/25.
+//
+
 import Foundation
 
 struct OutfitViewModel: Identifiable {

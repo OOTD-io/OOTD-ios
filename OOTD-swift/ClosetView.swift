@@ -4,6 +4,7 @@ import WeatherKit
 struct ClosetView: View {
     @ObservedObject var viewModel: ClosetViewModel
     let weather: CurrentWeather?
+    let weatherError: String?
 
     var body: some View {
         ScrollView {
@@ -12,6 +13,10 @@ struct ClosetView: View {
                 if let weather = weather {
                     WeatherCard(weather: weather)
                         .padding(.horizontal)
+                } else if let weatherError = weatherError {
+                    Text(weatherError)
+                        .foregroundColor(.red)
+                        .padding()
                 } else {
                     HStack {
                         Spacer()
@@ -112,6 +117,5 @@ struct ClosetView: View {
 }
 
 #Preview {
-    // You would need to mock a CurrentWeather object for a better preview
-    ClosetView(viewModel: ClosetViewModel(), weather: nil)
+    ClosetView(viewModel: ClosetViewModel(), weather: nil, weatherError: "Could not load weather.")
 }

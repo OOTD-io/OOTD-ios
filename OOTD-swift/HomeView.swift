@@ -24,7 +24,7 @@ struct HomeView<Content>: View where Content: View {
             Group {
                 switch selectedTab {
                 case .closet:
-                    ClosetView(viewModel: closetViewModel, weather: weatherManager.currentWeather)
+                    ClosetView(viewModel: closetViewModel, weather: weatherManager.currentWeather, weatherError: weatherManager.errorMessage)
                         .onAppear {
                             // First, request location permission. This starts the weather flow.
                             locationManager.requestLocationPermission()
