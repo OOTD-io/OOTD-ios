@@ -11,7 +11,7 @@ struct OutfitTileView: View {
         } placeholder: {
             ProgressView()
         }
-        .frame(minHeight: 150) // Give it a reasonable size
+        .frame(minHeight: 150)
         .background(Color.gray.opacity(0.1))
         .cornerRadius(10)
         .clipped()

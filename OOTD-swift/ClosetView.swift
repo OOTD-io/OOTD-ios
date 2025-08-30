@@ -7,77 +7,87 @@ struct ClosetView: View {
 
     var body: some View {
         ScrollView {
-            VStack {
+            VStack(alignment: .leading, spacing: 20) {
                 // 1. Weather Section
                 if let weather = weather {
                     WeatherCard(weather: weather)
-                        .padding()
+                        .padding(.horizontal)
                 } else {
-                    // A placeholder while weather is loading
                     HStack {
+                        Spacer()
                         Text("Loading Weather...")
                         ProgressView()
+                        Spacer()
                     }
                     .padding()
                 }
 
                 // 2. Generated Outfits Section
                 if viewModel.isLoadingOutfits {
-                    ProgressView("Generating Outfits...")
+                    HStack {
+                        Spacer()
+                        ProgressView("Generating Outfits...")
+                        Spacer()
+                    }
                 } else if !viewModel.outfitViewModels.isEmpty {
                     VStack(alignment: .leading) {
                         Text("Generated Outfits")
-                            .font(.title)
-                            .fontWeight(.bold)
+                            .font(.title2).bold()
                             .padding(.horizontal)
 
-                        // Grid for outfits
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 150))], spacing: 20) {
                             ForEach(viewModel.outfitViewModels) { outfitVM in
                                 OutfitTileView(outfitViewModel: outfitVM)
                             }
                         }
-                        .padding()
+                        .padding(.horizontal)
                     }
                 }
 
                 // 3. Individual Clothing Sections
-                if let errorMessage = viewModel.errorMessage {
+                if viewModel.isLoadingClothes {
+                     HStack {
+                        Spacer()
+                        ProgressView("Loading Your Closet...")
+                        Spacer()
+                    }
+                } else if let errorMessage = viewModel.errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
                         .padding()
                 } else {
-                    clothingSection(title: "👕 Tops", category: .tops)
-                    clothingSection(title: "👖 Bottoms", category: .bottoms)
-                    clothingSection(title: "👟 Shoes", category: .shoes)
-                    clothingSection(title: "🧥 Outerwear", category: .outerwear)
-                    clothingSection(title: "👜 Accessories", category: .accessories)
+                    // Use CaseIterable to avoid hardcoding sections
+                    ForEach(ClothingCategory.allCases, id: \.self) { category in
+                        clothingSection(for: category)
+                    }
                 }
             }
+            .padding(.vertical)
         }
     }
 
     @ViewBuilder
-    private func clothingSection(title: String, category: ClothingCategory) -> some View {
+    private func clothingSection(for category: ClothingCategory) -> some View {
         let items = viewModel.clothingItems.filter { $0.uiCategory == category }
 
         if !items.isEmpty {
             VStack(alignment: .leading) {
                 HStack {
-                    Text(title)
+                    // A simple way to get an emoji, can be improved
+                    let emoji = emoji(for: category)
+                    Text("\(emoji) \(category.rawValue)")
                         .font(.title2)
                         .fontWeight(.bold)
                     Spacer()
                     NavigationLink("See All →") {
-                        ClothingListView(title: title, items: items)
+                        ClothingListView(title: category.rawValue, items: items)
                     }
                     .font(.subheadline)
-                    .padding(.trailing, 10)
                 }
                 .padding(.horizontal)
 
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 20) {
+                    HStack(spacing: 15) {
                         ForEach(items) { item in
                             ClothingNavigationTile(clothing: item, isLarge: false)
                         }
@@ -88,8 +98,20 @@ struct ClosetView: View {
             .padding(.vertical, 10)
         }
     }
+
+    private func emoji(for category: ClothingCategory) -> String {
+        switch category {
+        case .tops: "👕"
+        case .bottoms: "👖"
+        case .shoes: "👟"
+        case .accessories: "👜"
+        case .outerwear: "🧥"
+        case .other: "✨"
+        }
+    }
 }
 
 #Preview {
+    // You would need to mock a CurrentWeather object for a better preview
     ClosetView(viewModel: ClosetViewModel(), weather: nil)
 }

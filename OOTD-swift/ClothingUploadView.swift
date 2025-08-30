@@ -1,10 +1,3 @@
-//
-//  ClothingUploadView.swift
-//  OOTD-swift
-//
-//  Created by Rahqi Sarsour on 6/16/25.
-//
-
 import SwiftUI
 import PhotosUI
 
@@ -13,44 +6,25 @@ struct ClothingUploadView: View {
     @State private var backImage: UIImage?
     @State private var tagImage: UIImage?
 
-    @State private var frontItem: PhotosPickerItem?
-    @State private var backItem: PhotosPickerItem?
-    @State private var tagItem: PhotosPickerItem?
-
-    @State private var showCamera = false
+    @State private var showingPicker = false
+    @State private var selectedPickerItem: PhotosPickerItem?
     @State private var activeCameraTarget: String?
+    @State private var showCamera = false
 
     @State private var isLoading = false
     @State private var showingAlert = false
     @State private var alertTitle = ""
     @State private var alertMessage = ""
 
-
     var body: some View {
         VStack(spacing: 30) {
             Text("Upload Clothing Images")
-                .font(.title2)
-                .bold()
-                .padding(.top)
+                .font(.title2).bold().padding(.top)
 
             HStack(spacing: 20) {
-                UploadTile(title: "Front", image: $frontImage, onSelectPhoto: {
-                    pickPhoto(for: "front")
-                }, onTakePhoto: {
-                    openCamera(for: "front")
-                })
-
-                UploadTile(title: "Back", image: $backImage, onSelectPhoto: {
-                    pickPhoto(for: "back")
-                }, onTakePhoto: {
-                    openCamera(for: "back")
-                })
-
-                UploadTile(title: "Tag", image: $tagImage, onSelectPhoto: {
-                    pickPhoto(for: "tag")
-                }, onTakePhoto: {
-                    openCamera(for: "tag")
-                })
+                UploadTile(title: "Front", image: $frontImage, onSelectPhoto: { pickPhoto(for: "front") }, onTakePhoto: { openCamera(for: "front") })
+                UploadTile(title: "Back", image: $backImage, onSelectPhoto: { pickPhoto(for: "back") }, onTakePhoto: { openCamera(for: "back") })
+                UploadTile(title: "Tag", image: $tagImage, onSelectPhoto: { pickPhoto(for: "tag") }, onTakePhoto: { openCamera(for: "tag") })
             }
 
             if isLoading {
@@ -59,7 +33,7 @@ struct ClothingUploadView: View {
                 Button(action: saveClothing) {
                     Text("Save Clothing")
                         .fontWeight(.semibold)
-                        .frame(minWidth: 0, maxWidth: .infinity)
+                        .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.blue)
                         .foregroundColor(.white)
@@ -67,7 +41,6 @@ struct ClothingUploadView: View {
                 }
                 .disabled(frontImage == nil)
             }
-
 
             Spacer()
         }
@@ -86,16 +59,12 @@ struct ClothingUploadView: View {
         }
     }
 
-    // MARK: Picker Handling
-    @State private var showingPicker = false
-    @State private var selectedPickerItem: PhotosPickerItem?
-
-    func pickPhoto(for type: String) {
+    private func pickPhoto(for type: String) {
         activeCameraTarget = type
         showingPicker = true
     }
 
-    func loadPickerImage() {
+    private func loadPickerImage() {
         guard let item = selectedPickerItem else { return }
         Task {
             if let data = try? await item.loadTransferable(type: Data.self),
@@ -105,14 +74,13 @@ struct ClothingUploadView: View {
         }
     }
 
-    // MARK: Camera Handling
-    func openCamera(for type: String) {
+    private func openCamera(for type: String) {
         activeCameraTarget = type
         showCamera = true
     }
 
-    func applyImage(_ image: UIImage?, to target: String?) {
-        guard let image else { return }
+    private func applyImage(_ image: UIImage?, to target: String?) {
+        guard let image = image else { return }
         switch target {
         case "front": frontImage = image
         case "back": backImage = image
@@ -121,8 +89,7 @@ struct ClothingUploadView: View {
         }
     }
 
-    // MARK: - Save Clothing
-    func saveClothing() {
+    private func saveClothing() {
         guard let frontImage = frontImage else {
             alertTitle = "Missing Image"
             alertMessage = "Please select at least a front image."
@@ -133,14 +100,10 @@ struct ClothingUploadView: View {
         isLoading = true
 
         Task {
-            let frontBase64 = frontImage.jpegData(compressionQuality: 0.8)?.base64EncodedString()
-            let backBase64 = backImage?.jpegData(compressionQuality: 0.8)?.base64EncodedString()
-            let tagBase64 = tagImage?.jpegData(compressionQuality: 0.8)?.base64EncodedString()
-
             let request = ClothingItemRequest(
-                frontImage: frontBase64!,
-                backImage: backBase64,
-                tagImage: tagBase64
+                frontImage: frontImage.jpegData(compressionQuality: 0.8)?.base64EncodedString() ?? "",
+                backImage: backImage?.jpegData(compressionQuality: 0.8)?.base64EncodedString(),
+                tagImage: tagImage?.jpegData(compressionQuality: 0.8)?.base64EncodedString()
             )
 
             do {
@@ -159,12 +122,10 @@ struct ClothingUploadView: View {
         }
     }
 
-    func resetForm() {
+    private func resetForm() {
         frontImage = nil
         backImage = nil
         tagImage = nil
-        frontItem = nil
-        backItem = nil
-        tagItem = nil
+        selectedPickerItem = nil
     }
 }

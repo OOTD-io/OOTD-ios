@@ -1,10 +1,3 @@
-//
-//  SwiftUIView.swift
-//  OOTD-swift
-//
-//  Created by Rahqi Sarsour on 6/14/25.
-//
-
 import SwiftUI
 import AuthenticationServices
 import WeatherKit
@@ -66,53 +59,28 @@ struct HomeView<Content>: View where Content: View {
             // Custom Tab Bar
             HStack {
                 Spacer()
-
-                Button(action: {
-                    selectedTab = .closet
-                }) {
+                Button(action: { selectedTab = .closet }) {
                     VStack {
                         Image(systemName: "tshirt.fill")
-                        Text("Closet")
-                            .font(.caption2)
+                        Text("Closet").font(.caption2)
                     }
                 }
                 .foregroundColor(selectedTab == .closet ? .blue : .gray)
-
                 Spacer()
-
-                Button(action: {
-                    selectedTab = .add
-                }) {
+                Button(action: { selectedTab = .add }) {
                     ZStack {
-                        Circle()
-                            .foregroundColor(.blue)
-                            .frame(width: 56, height: 56)
-                            .shadow(radius: 4)
-
-                        Image(systemName: "plus")
-                            .foregroundColor(.white)
-                            .font(.system(size: 24, weight: .bold))
+                        Circle().foregroundColor(.blue).frame(width: 56, height: 56).shadow(radius: 4)
+                        Image(systemName: "plus").foregroundColor(.white).font(.system(size: 24, weight: .bold))
                     }
                 }
-
                 Spacer()
-
-                Button(action: {
-                    selectedTab = .profile
-                }) {
+                Button(action: { selectedTab = .profile }) {
                     VStack {
                         Image(systemName: "person.crop.circle")
-                        Text("Profile")
-                        .font(.caption2)
+                        Text("Profile").font(.caption2)
                     }
                 }
                 .foregroundColor(selectedTab == .profile ? .blue : .gray)
-                .onReceive(NotificationCenter.default.publisher(for: ASAuthorizationAppleIDProvider.credentialRevokedNotification)) { event in
-                  if let userInfo = event.userInfo, let info = userInfo["info"] {
-                    print(info)
-                  }
-                }
-
                 Spacer()
             }
             .padding(.vertical, 10)
@@ -121,8 +89,4 @@ struct HomeView<Content>: View where Content: View {
             .offset(y:30)
         }
     }
-}
-
-#Preview {
-//    HomeView(nil, nil)
 }

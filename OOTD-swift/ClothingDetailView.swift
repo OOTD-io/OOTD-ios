@@ -1,10 +1,3 @@
-//
-//  ClothingDetailView.swift
-//  OOTD-swift
-//
-//  Created by Rahqi Sarsour on 6/16/25.
-//
-
 import SwiftUICore
 import SwiftUI
 import SceneKit
@@ -14,35 +7,24 @@ struct ClothingDetailView: View {
     let item: ClothingItem
     @Environment(\.dismiss) private var dismiss
 
-    
-
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                //            if let filename = item.usdzFilename,
-                //            Bundle.main.url(forResource: <#T##String?#>, withExtension: <#T##String?#>)
-                //            let url = Bundle.main.url(forResource: "harry_potter_uniform", withExtension: "usdz")
-                //            USDZPreview(usdzURL: url!)
-                //                    .frame(height: 300)
-                //                    .cornerRadius(12)
-                //                    .padding(.top)
-                //            ARModelView(modelName: "harry_potter_uniform")
                 if let sceneName = item.sceneImage {
                     SceneKitView(modelName: sceneName)
-//                        .ignoresSafeArea()
-                                    .frame(height: 300)
-                    //                .cornerRadius(12)
-                    //                .padding()
-                    //                .background(.clear)
+                        .frame(height: 300)
                 } else {
-                    item.image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(height: 200)
-                        .cornerRadius(16)
-                        .padding(.top)
+                    AsyncImage(url: item.imageURL) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                    } placeholder: {
+                        ProgressView()
+                    }
+                    .frame(height: 200)
+                    .cornerRadius(16)
+                    .padding(.top)
                 }
-                
                 
                 Text(item.name)
                     .font(.title2)
@@ -61,7 +43,6 @@ struct ClothingDetailView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
-                    // Handle dismiss (via pop)
                     dismiss()
                 }) {
                     HStack(spacing: 4) {
@@ -70,13 +51,9 @@ struct ClothingDetailView: View {
                         Text("Back")
                             .font(.system(size: 16, weight: .medium))
                     }
-                    .foregroundColor(Color.primary) // Or your custom color
+                    .foregroundColor(Color.primary)
                     .padding(.vertical, 8)
                     .padding(.horizontal, 12)
-//                    .background(
-//                        RoundedRectangle(cornerRadius: 10)
-//                            .fill(Color(UIColor.systemGray5))
-//                    )
                 }
             }
         }

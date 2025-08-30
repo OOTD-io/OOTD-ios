@@ -1,10 +1,3 @@
-//
-//  ClothingItem.swift
-//  OOTD-swift
-//
-//  Created by Rahqi Sarsour on 6/16/25.
-//
-
 import SwiftUI
 
 enum ClothingCategory: String, CaseIterable {
@@ -26,22 +19,16 @@ struct ClothingItem: Identifiable {
 
     var uiCategory: ClothingCategory {
         switch category.lowercased() {
-        // Tops
         case "t-shirt", "shirt", "blouse", "top", "tank top", "polo shirt", "henley", "sweater", "sweatshirt", "hoodie":
             return .tops
-        // Bottoms
         case "jeans", "pants", "trousers", "shorts", "skirt", "leggings", "jeggings", "sweatpants":
             return .bottoms
-        // Shoes
         case "shoes", "sneakers", "boots", "sandals", "heels", "flats", "loafers":
             return .shoes
-        // Accessories
         case "hat", "cap", "beanie", "scarf", "gloves", "belt", "tie", "sunglasses", "watch", "jewelry", "bag", "backpack":
             return .accessories
-        // Outerwear
         case "jacket", "coat", "vest", "blazer", "windbreaker", "cardigan":
             return .outerwear
-        // Default
         default:
             return .other
         }

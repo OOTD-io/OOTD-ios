@@ -60,6 +60,7 @@ class ClosetViewModel: ObservableObject {
     }
 
     private func mapOutfits() {
+        // Can't map outfits if we don't have the clothing items to look up
         guard !clothingItems.isEmpty else { return }
         let clothingDict = Dictionary(uniqueKeysWithValues: clothingItems.map { ($0.id, $0) })
 
