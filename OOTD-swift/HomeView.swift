@@ -26,6 +26,7 @@ struct HomeView<Content>: View where Content: View {
                 case .closet:
                     ClosetView(viewModel: closetViewModel, weather: weatherManager.currentWeather, weatherError: weatherManager.errorMessage)
                         .onAppear {
+                            print("[HomeView] onAppear triggered. Requesting location and clothes.")
                             // First, request location permission. This starts the weather flow.
                             locationManager.requestLocationPermission()
                             // Immediately fetch the user's saved clothes.
@@ -34,13 +35,17 @@ struct HomeView<Content>: View where Content: View {
                             }
                         }
                         .task(id: weatherManager.currentWeather) {
+                            print("[HomeView] weather task triggered.")
                             // When weather changes (and is not nil), generate outfits.
                             if let weather = weatherManager.currentWeather {
+                                print("[HomeView] Weather data is available, generating outfits.")
                                 let weatherRequest = WeatherRequest(
                                     temperature: weather.temperature.converted(to: .fahrenheit).value,
                                     condition: weather.condition.description
                                 )
                                 await closetViewModel.generateOutfits(weather: weatherRequest)
+                            } else {
+                                print("[HomeView] Weather data is nil.")
                             }
                         }
                     

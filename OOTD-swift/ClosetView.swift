@@ -6,6 +6,14 @@ struct ClosetView: View {
     let weather: CurrentWeather?
     let weatherError: String?
 
+    // This computed property will derive the available categories
+    private var availableCategories: [ClothingCategory] {
+        // Using a Set to get unique categories, then sorting for a consistent order.
+        // The order can be customized further if needed.
+        let categories = Set(viewModel.clothingItems.map { $0.uiCategory })
+        return Array(categories).sorted { $0.rawValue < $1.rawValue }
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -61,8 +69,8 @@ struct ClosetView: View {
                         .foregroundColor(.red)
                         .padding()
                 } else {
-                    // Use CaseIterable to avoid hardcoding sections
-                    ForEach(ClothingCategory.allCases, id: \.self) { category in
+                    // Use the new computed property to create the sections dynamically
+                    ForEach(availableCategories, id: \.self) { category in
                         clothingSection(for: category)
                     }
                 }
