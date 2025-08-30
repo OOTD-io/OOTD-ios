@@ -1,48 +1,38 @@
 import SwiftUI
 
+// This enum's cases now directly map to the backend's `type` literals.
+// The rawValue is what will be displayed in the UI.
 enum ClothingCategory: String, CaseIterable {
-    case tops = "Tops"
-    case bottoms = "Bottoms"
-    case dresses = "Dresses" // Added
-    case outerwear = "Outerwear"
+    case top = "Tops"
+    case bottom = "Bottoms"
+    case dress = "Dresses"
     case shoes = "Shoes"
-    case accessories = "Accessories"
-    case other = "Other"
+    case outerwear = "Outerwear"
+    case accessory = "Accessories"
+    case unknown = "Other"
 }
 
 struct ClothingItem: Identifiable {
     let id: String
-    let category: String // This comes from the API's 'type' field
+    let category: String // This is the raw 'type' string from the API
     let name: String
     let size: String
     let imageURL: URL?
     let sceneImage: String?
 
+    // This computed property now performs a direct mapping.
     var uiCategory: ClothingCategory {
-        let lowercasedCategory = category.lowercased()
-
-        switch lowercasedCategory {
-        // Tops
-        case "t-shirt", "shirt", "blouse", "top", "tank top", "polo shirt", "henley", "sweater", "sweatshirt", "hoodie":
-            return .tops
-        // Bottoms
-        case "jeans", "pants", "trousers", "shorts", "skirt", "leggings", "jeggings", "sweatpants":
-            return .bottoms
-        // Dresses
-        case "dress", "sundress", "gown":
-            return .dresses
-        // Outerwear
-        case "jacket", "coat", "vest", "blazer", "windbreaker", "cardigan":
-            return .outerwear
-        // Shoes
-        case "shoes", "sneakers", "boots", "sandals", "heels", "flats", "loafers":
-            return .shoes
-        // Accessories
-        case "hat", "cap", "beanie", "scarf", "gloves", "belt", "tie", "sunglasses", "watch", "jewelry", "bag", "backpack":
-            return .accessories
-        // Default
-        default:
-            return .other
+        // We initialize the enum from the raw string from the API.
+        // If the string from the API doesn't match a known case, it defaults to .unknown.
+        // This is much more robust than a switch statement with hardcoded strings.
+        switch category.lowercased() {
+            case "top": return .top
+            case "bottom": return .bottom
+            case "dress": return .dress
+            case "shoes": return .shoes
+            case "outerwear": return .outerwear
+            case "accessory": return .accessory
+            default: return .unknown
         }
     }
 }

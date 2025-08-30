@@ -59,16 +59,23 @@ class ClosetViewModel: ObservableObject {
         isLoadingOutfits = true
         do {
             let response = try await AIEngineService.shared.generateOutfit(weather: weather)
+            print("[ClosetViewModel] Received \(response.outfits.count) outfits from API.")
             self.generatedOutfitsDTOs = response.outfits
         } catch {
-            print("Error generating outfits: \(error)")
+            print("[ClosetViewModel] Error generating outfits: \(error)")
         }
         isLoadingOutfits = false
     }
 
     private func mapOutfits() {
-        // Can't map outfits if we don't have the clothing items to look up
-        guard !clothingItems.isEmpty else { return }
+        print("[ClosetViewModel] mapOutfits called.")
+        print("[ClosetViewModel] clothingItems count: \(clothingItems.count)")
+        print("[ClosetViewModel] generatedOutfitsDTOs count: \(generatedOutfitsDTOs.count)")
+
+        guard !clothingItems.isEmpty else {
+            print("[ClosetViewModel] clothingItems is empty, cannot map outfits yet.")
+            return
+        }
         let clothingDict = Dictionary(uniqueKeysWithValues: clothingItems.map { ($0.id, $0) })
 
         let newViewModels = generatedOutfitsDTOs.map { dto -> OutfitViewModel in
@@ -76,6 +83,7 @@ class ClosetViewModel: ObservableObject {
 
             let tops = items.filter { $0.uiCategory == .tops }
             let bottoms = items.filter { $0.uiCategory == .bottoms }
+            let dress = items.filter { $0.uiCategory == .dress }
             let shoes = items.filter { $0.uiCategory == .shoes }
             let outerwear = items.filter { $0.uiCategory == .outerwear }
             let accessories = items.filter { $0.uiCategory == .accessories }
@@ -84,6 +92,7 @@ class ClosetViewModel: ObservableObject {
                 id: dto.id,
                 tops: tops,
                 bottoms: bottoms,
+                dress: dress,
                 shoes: shoes,
                 outerwear: outerwear,
                 accessories: accessories,
@@ -91,6 +100,7 @@ class ClosetViewModel: ObservableObject {
             )
         }
 
+        print("[ClosetViewModel] Created \(newViewModels.count) outfit view models.")
         self.outfitViewModels = newViewModels
     }
 }

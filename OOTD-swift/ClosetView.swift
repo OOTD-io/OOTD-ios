@@ -8,10 +8,16 @@ struct ClosetView: View {
 
     // This computed property will derive the available categories
     private var availableCategories: [ClothingCategory] {
-        // Using a Set to get unique categories, then sorting for a consistent order.
-        // The order can be customized further if needed.
         let categories = Set(viewModel.clothingItems.map { $0.uiCategory })
-        return Array(categories).sorted { $0.rawValue < $1.rawValue }
+        // A specific, logical order for the UI
+        let desiredOrder: [ClothingCategory] = [.top, .bottom, .dress, .outerwear, .shoes, .accessory, .unknown]
+        return categories.sorted { cat1, cat2 in
+            guard let firstIndex = desiredOrder.firstIndex(of: cat1),
+                  let secondIndex = desiredOrder.firstIndex(of: cat2) else {
+                return false
+            }
+            return firstIndex < secondIndex
+        }
     }
 
     var body: some View {
@@ -69,7 +75,6 @@ struct ClosetView: View {
                         .foregroundColor(.red)
                         .padding()
                 } else {
-                    // Use the new computed property to create the sections dynamically
                     ForEach(availableCategories, id: \.self) { category in
                         clothingSection(for: category)
                     }
@@ -86,9 +91,7 @@ struct ClosetView: View {
         if !items.isEmpty {
             VStack(alignment: .leading) {
                 HStack {
-                    // A simple way to get an emoji, can be improved
-                    let emoji = emoji(for: category)
-                    Text("\(emoji) \(category.rawValue)")
+                    Text("\(emoji(for: category)) \(category.rawValue)")
                         .font(.title2)
                         .fontWeight(.bold)
                     Spacer()
@@ -114,13 +117,13 @@ struct ClosetView: View {
 
     private func emoji(for category: ClothingCategory) -> String {
         switch category {
-        case .tops: "👕"
-        case .bottoms: "👖"
-        case .dresses: "👗"
+        case .top: "👕"
+        case .bottom: "👖"
+        case .dress: "👗"
         case .shoes: "👟"
-        case .accessories: "👜"
+        case .accessory: "👜"
         case .outerwear: "🧥"
-        case .other: "✨"
+        case .unknown: "✨"
         }
     }
 }
