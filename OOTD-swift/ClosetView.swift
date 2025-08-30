@@ -116,6 +116,7 @@ struct ClosetView: View {
         switch category {
         case .tops: "👕"
         case .bottoms: "👖"
+        case .dresses: "👗"
         case .shoes: "👟"
         case .accessories: "👜"
         case .outerwear: "🧥"
