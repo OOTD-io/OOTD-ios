@@ -112,7 +112,7 @@ struct GenerateOutfitRequest: Codable {
 }
 
 struct OutfitResponseDTO: Codable, Identifiable {
-    var id: String { clothingItemIds.joined(separator: "-") }
+    var id: String { clothingItemIds.sorted().joined(separator: "-") }
     let category: String
     let clothingItemIds: [String]
     let imageUrl: String?
