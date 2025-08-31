@@ -40,7 +40,8 @@ class AuthenticationViewModel: ObservableObject {
   @Published var isUpdatingPassword = false
   @Published var passwordUpdateErrorMessage: String? = nil
 
-  private var authStateHandler: AuthStateDidChangeListenerHandle?
+  // The handle for the auth state listener.
+  private var authStateHandler: AuthStateChangeSubscription?
   private var currentNonce: String?
 
   init() {
@@ -57,7 +58,7 @@ class AuthenticationViewModel: ObservableObject {
   }
 
   deinit {
-      authStateHandler?.cancel()
+      authStateHandler?.unsubscribe()
   }
 
   func registerAuthStateHandler() {
@@ -72,17 +73,15 @@ class AuthenticationViewModel: ObservableObject {
                           self.user = session?.user
                           self.authenticationState = .authenticated
                           self.displayName = session?.user?.email ?? ""
-                          self.needsPasswordReset = false // Reset on sign in
+                          self.needsPasswordReset = false
                       case .signedOut, .userDeleted:
                           self.user = nil
                           self.authenticationState = .unauthenticated
                           self.displayName = ""
                       case .passwordRecovery:
-                          // This event is triggered after the user follows the password recovery link.
-                          // This is the trigger to show the password reset view.
                           self.needsPasswordReset = true
                       case .tokenRefreshed:
-                          break // No UI change needed
+                          break
                       }
                   }
               }
@@ -115,7 +114,6 @@ extension AuthenticationViewModel {
             passwordResetEmailSent = true
         }
         catch {
-            print("Error sending password reset: \(error)")
             passwordResetErrorMessage = error.localizedDescription
         }
 
@@ -128,12 +126,10 @@ extension AuthenticationViewModel {
 
         do {
             try await supabase.auth.update(user: UserAttributes(password: newPassword))
-            print("Password updated successfully.")
-            needsPasswordReset = false // Dismiss the sheet
+            needsPasswordReset = false
             await self.signOut()
         }
         catch {
-            print("Error updating password: \(error)")
             passwordUpdateErrorMessage = error.localizedDescription
         }
 
@@ -147,7 +143,6 @@ extension AuthenticationViewModel {
             return true
         }
         catch  {
-            print(error)
             errorMessage = error.localizedDescription
             authenticationState = .unauthenticated
             return false
@@ -160,7 +155,6 @@ extension AuthenticationViewModel {
             try await supabase.auth.signUp(email: email, password: password)
             return true
         } catch {
-            print("Signup failed: \(error.localizedDescription)")
             errorMessage = error.localizedDescription
             authenticationState = .unauthenticated
             return false
@@ -173,13 +167,13 @@ extension AuthenticationViewModel {
             return true
         }
         catch  {
-            print(error)
             errorMessage = error.localizedDescription
             return false
         }
     }
 
     func deleteAccount() async -> Bool {
+        // This is a placeholder, actual implementation would be needed.
         return true
     }
 }
@@ -201,11 +195,9 @@ extension AuthenticationViewModel {
                 fatalError("Invalid state: a login callback was received, but no login request was sent.")
               }
               guard let appleIDToken = appleIDCredential.identityToken else {
-                print("Unable to fetch identify token.")
                 return
               }
               guard let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
-                print("Unable to serialise token string from data: \(appleIDToken.debugDescription)")
                 return
               }
 
@@ -215,7 +207,6 @@ extension AuthenticationViewModel {
                         credentials: .init(provider: .apple, idToken: idTokenString, nonce: nonce)
                       )
                   } catch {
-                      print("Error authenticating: \(error.localizedDescription)")
                       self.errorMessage = error.localizedDescription
                   }
               }
@@ -237,9 +228,7 @@ private func randomNonceString(length: Int = 32) -> String {
       var random: UInt8 = 0
       let errorCode = SecRandomCopyBytes(kSecRandomDefault, 1, &random)
       if errorCode != errSecSuccess {
-        fatalError(
-          "Unable to generate nonce. SecRandomCopyBytes failed with OSStatus \(errorCode)"
-        )
+        fatalError("Unable to generate nonce. SecRandomCopyBytes failed with OSStatus \(errorCode)")
       }
       return random
     }
