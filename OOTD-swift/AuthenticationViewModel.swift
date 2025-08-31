@@ -58,6 +58,17 @@ class AuthenticationViewModel: ObservableObject {
   @Published var user: User?
   @Published var displayName = ""
 
+  // For Forgot Password Flow
+  @Published var isShowingForgotPassword = false
+  @Published var isSendingPasswordReset = false
+  @Published var passwordResetEmailSent = false
+  @Published var passwordResetErrorMessage: String? = nil
+
+  // For Reset Password Flow
+  @Published var isShowingResetPassword = false
+  @Published var isUpdatingPassword = false
+  @Published var passwordUpdateErrorMessage: String? = nil
+
   private var currentNonce: String?
 
   init() {
@@ -114,6 +125,42 @@ class AuthenticationViewModel: ObservableObject {
 // MARK: - Email and Password Authentication
 
 extension AuthenticationViewModel {
+    func sendPasswordResetEmail() async {
+        isSendingPasswordReset = true
+        passwordResetErrorMessage = nil
+        passwordResetEmailSent = false
+
+        do {
+            try await supabase.auth.resetPasswordForEmail(email)
+            passwordResetEmailSent = true
+        }
+        catch {
+            print("Error sending password reset: \(error)")
+            passwordResetErrorMessage = error.localizedDescription
+        }
+
+        isSendingPasswordReset = false
+    }
+
+    func updateUserPassword(newPassword: String) async {
+        isUpdatingPassword = true
+        passwordUpdateErrorMessage = nil
+
+        do {
+            try await supabase.auth.update(user: UserAttributes(password: newPassword))
+            // Optionally, sign the user out after a successful password change
+            // for enhanced security.
+            print("Password updated successfully.")
+            isShowingResetPassword = false
+        }
+        catch {
+            print("Error updating password: \(error)")
+            passwordUpdateErrorMessage = error.localizedDescription
+        }
+
+        isUpdatingPassword = false
+    }
+
   func signInWithEmailPassword() async -> Bool {
 //      return true
     authenticationState = .authenticating
