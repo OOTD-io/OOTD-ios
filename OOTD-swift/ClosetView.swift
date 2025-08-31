@@ -50,9 +50,24 @@ struct ClosetView: View {
                     }
                 } else if !viewModel.outfitViewModels.isEmpty {
                     VStack(alignment: .leading) {
-                        Text("Generated Outfits")
-                            .font(.title2).bold()
-                            .padding(.horizontal)
+                        HStack {
+                            Text("Generated Outfits")
+                                .font(.title2).bold()
+                            Spacer()
+                            if let weather = weather {
+                                Button("Regenerate") {
+                                    Task {
+                                        let weatherRequest = WeatherRequest(
+                                            temperature: weather.temperature.converted(to: .fahrenheit).value,
+                                            condition: weather.condition.description
+                                        )
+                                        await viewModel.forceRegenerateOutfits(weather: weatherRequest)
+                                    }
+                                }
+                                .font(.subheadline)
+                            }
+                        }
+                        .padding(.horizontal)
 
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 150))], spacing: 20) {
                             ForEach(viewModel.outfitViewModels) { outfitVM in
