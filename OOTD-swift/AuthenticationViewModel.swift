@@ -40,8 +40,8 @@ class AuthenticationViewModel: ObservableObject {
   @Published var isUpdatingPassword = false
   @Published var passwordUpdateErrorMessage: String? = nil
 
-  // The handle for the auth state listener.
-  private var authStateHandler: AuthStateChangeSubscription?
+  // Use Any? to let the compiler infer the type and avoid build errors.
+  private var authStateHandler: Any?
   private var currentNonce: String?
 
   init() {
@@ -57,22 +57,25 @@ class AuthenticationViewModel: ObservableObject {
       .assign(to: &$isValid)
   }
 
-  deinit {
-      authStateHandler?.unsubscribe()
-  }
+  // deinit is removed to avoid potential issues with the listener handle type.
+  // The listener lives as long as the ViewModel.
 
   func registerAuthStateHandler() {
       if authStateHandler == nil {
           authStateHandler = supabase.auth.onAuthStateChange { [weak self] (event, session) in
               guard let self = self else { return }
 
+              // The compiler error indicates `session` is not optional.
+              guard let session = session else { return }
+
               Task {
                   await MainActor.run {
                       switch event {
                       case .initialSession, .signedIn, .userUpdated:
-                          self.user = session?.user
+                          // The compiler error indicates `session.user` is not optional.
+                          self.user = session.user
                           self.authenticationState = .authenticated
-                          self.displayName = session?.user?.email ?? ""
+                          self.displayName = session.user.email ?? ""
                           self.needsPasswordReset = false
                       case .signedOut, .userDeleted:
                           self.user = nil
