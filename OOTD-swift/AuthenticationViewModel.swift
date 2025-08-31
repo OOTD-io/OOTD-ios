@@ -40,12 +40,11 @@ class AuthenticationViewModel: ObservableObject {
   @Published var isUpdatingPassword = false
   @Published var passwordUpdateErrorMessage: String? = nil
 
-  private var authStateTask: Task<Void, Never>? = nil
+  private var authStateHandler: AuthStateDidChangeListenerHandle?
   private var currentNonce: String?
 
   init() {
     registerAuthStateHandler()
-    verifySignInWithAppleAuthenticationState()
 
     $flow
       .combineLatest($email, $password, $confirmPassword)
@@ -58,29 +57,33 @@ class AuthenticationViewModel: ObservableObject {
   }
 
   deinit {
-      authStateTask?.cancel()
+      authStateHandler?.cancel()
   }
 
   func registerAuthStateHandler() {
-      authStateTask = Task {
-          for await (event, session) in await supabase.auth.onAuthStateChange {
-              await MainActor.run {
-                  switch event {
-                  case .initialSession, .signedIn, .userUpdated:
-                      self.user = session?.user
-                      self.authenticationState = .authenticated
-                      self.displayName = session?.user?.email ?? ""
-                      self.needsPasswordReset = false // Reset on sign in
-                  case .signedOut, .userDeleted:
-                      self.user = nil
-                      self.authenticationState = .unauthenticated
-                      self.displayName = ""
-                  case .passwordRecovery:
-                      // This event is triggered after the user follows the password recovery link.
-                      // This is the trigger to show the password reset view.
-                      self.needsPasswordReset = true
-                  case .tokenRefreshed:
-                      break // No UI change needed
+      if authStateHandler == nil {
+          authStateHandler = supabase.auth.onAuthStateChange { [weak self] (event, session) in
+              guard let self = self else { return }
+
+              Task {
+                  await MainActor.run {
+                      switch event {
+                      case .initialSession, .signedIn, .userUpdated:
+                          self.user = session?.user
+                          self.authenticationState = .authenticated
+                          self.displayName = session?.user?.email ?? ""
+                          self.needsPasswordReset = false // Reset on sign in
+                      case .signedOut, .userDeleted:
+                          self.user = nil
+                          self.authenticationState = .unauthenticated
+                          self.displayName = ""
+                      case .passwordRecovery:
+                          // This event is triggered after the user follows the password recovery link.
+                          // This is the trigger to show the password reset view.
+                          self.needsPasswordReset = true
+                      case .tokenRefreshed:
+                          break // No UI change needed
+                      }
                   }
               }
           }
@@ -127,12 +130,7 @@ extension AuthenticationViewModel {
             try await supabase.auth.update(user: UserAttributes(password: newPassword))
             print("Password updated successfully.")
             needsPasswordReset = false // Dismiss the sheet
-            // Optionally sign out
-            await MainActor.run {
-                Task {
-                    await self.signOut()
-                }
-            }
+            await self.signOut()
         }
         catch {
             print("Error updating password: \(error)")
@@ -142,32 +140,32 @@ extension AuthenticationViewModel {
         isUpdatingPassword = false
     }
 
-  func signInWithEmailPassword() async -> Bool {
-    authenticationState = .authenticating
-    do {
-      try await supabase.auth.signIn(email: self.email, password: self.password)
-      return true
+    func signInWithEmailPassword() async -> Bool {
+        authenticationState = .authenticating
+        do {
+            try await supabase.auth.signIn(email: self.email, password: self.password)
+            return true
+        }
+        catch  {
+            print(error)
+            errorMessage = error.localizedDescription
+            authenticationState = .unauthenticated
+            return false
+        }
     }
-    catch  {
-      print(error)
-      errorMessage = error.localizedDescription
-      authenticationState = .unauthenticated
-      return false
-    }
-  }
 
-  func signUpWithEmailPassword() async -> Bool {
-    authenticationState = .authenticating
-    do {
-        try await supabase.auth.signUp(email: email, password: password)
-        return true
-    } catch {
-        print("Signup failed: \(error.localizedDescription)")
-        errorMessage = error.localizedDescription
-        authenticationState = .unauthenticated
-        return false
+    func signUpWithEmailPassword() async -> Bool {
+        authenticationState = .authenticating
+        do {
+            try await supabase.auth.signUp(email: email, password: password)
+            return true
+        } catch {
+            print("Signup failed: \(error.localizedDescription)")
+            errorMessage = error.localizedDescription
+            authenticationState = .unauthenticated
+            return false
+        }
     }
-  }
 
     func signOut() async -> Bool {
         do {
@@ -175,15 +173,15 @@ extension AuthenticationViewModel {
             return true
         }
         catch  {
-          print(error)
-          errorMessage = error.localizedDescription
-          return false
+            print(error)
+            errorMessage = error.localizedDescription
+            return false
         }
-  }
+    }
 
-  func deleteAccount() async -> Bool {
-      return true
-  }
+    func deleteAccount() async -> Bool {
+        return true
+    }
 }
 
 // MARK: - Sign in with Apple
@@ -223,10 +221,6 @@ extension AuthenticationViewModel {
               }
           }
       }
-  }
-
-  func verifySignInWithAppleAuthenticationState() {
-      // This is handled by the onAuthStateChange listener
   }
 }
 
