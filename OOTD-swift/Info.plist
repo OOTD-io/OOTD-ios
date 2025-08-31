@@ -26,7 +26,7 @@
 			<string>com.example.ootd</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>myapp</string>
+				<string>ootd</string>
 			</array>
 		</dict>
 	</array>
