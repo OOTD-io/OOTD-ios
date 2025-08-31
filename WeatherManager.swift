@@ -1,23 +1,26 @@
+//
+//  WeatherManager.swift
+//  OOTD-swift
+//
+//  Created by Rahqi Sarsour on 6/17/25.
+//
 import SwiftUI
-import WeatherKit
+@preconcurrency import WeatherKit
 import CoreLocation
 
-@MainActor
 class WeatherManager: ObservableObject {
     private let service = WeatherService()
     
     @Published var currentWeather: CurrentWeather?
-    @Published var errorMessage: String?
 
     func fetchWeather(for location: CLLocation) async {
-        errorMessage = nil
-
         do {
             let weather = try await service.weather(for: location)
-            self.currentWeather = weather.currentWeather
+            DispatchQueue.main.async {
+                self.currentWeather = weather.currentWeather
+            }
         } catch {
             print("Weather error:", error.localizedDescription)
-            self.errorMessage = "Failed to fetch weather. Please try again."
         }
     }
 }

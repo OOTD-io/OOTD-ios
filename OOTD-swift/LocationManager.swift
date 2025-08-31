@@ -2,8 +2,9 @@
 //  LocationManager.swift
 //  OOTD-swift
 //
-//  Created by Riyad Sarsour on 8/30/25.
+//  Created by Rahqi Sarsour on 6/17/25.
 //
+
 
 import CoreLocation
 import Combine
@@ -12,27 +13,17 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let manager = CLLocationManager()
 
     @Published var location: CLLocation?
-    @Published var authorizationStatus: CLAuthorizationStatus
+    @Published var authorizationStatus: CLAuthorizationStatus = .notDetermined
 
     override init() {
-        self.authorizationStatus = manager.authorizationStatus
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
     }
 
     func requestLocationPermission() {
-        switch manager.authorizationStatus {
-        case .authorizedWhenInUse, .authorizedAlways:
-            manager.requestLocation()
-        case .notDetermined:
-            manager.requestWhenInUseAuthorization()
-        case .denied, .restricted:
-            print("Location permission is denied or restricted.")
-            break
-        @unknown default:
-            break
-        }
+        manager.requestWhenInUseAuthorization()
+        manager.requestLocation()
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -40,12 +31,12 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("Failed to get location: \(error.localizedDescription)")
+        print("Failed to get location: \(error)")
     }
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        self.authorizationStatus = manager.authorizationStatus
-        if manager.authorizationStatus == .authorizedWhenInUse || manager.authorizationStatus == .authorizedAlways {
+        authorizationStatus = manager.authorizationStatus
+        if authorizationStatus == .authorizedWhenInUse || authorizationStatus == .authorizedAlways {
             manager.requestLocation()
         }
     }

@@ -30,8 +30,6 @@ struct ResetPasswordView: View {
             } else {
                 Button(action: {
                     Task {
-                        // The token is not needed here because the user's session
-                        // was already updated by the deep link handler.
                         await viewModel.updateUserPassword(newPassword: newPassword)
                     }
                 }) {

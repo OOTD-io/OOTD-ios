@@ -1,10 +1,19 @@
+//
+//  SwiftUIView.swift
+//  OOTD-swift
+//
+//  Created by Rahqi Sarsour on 6/14/25.
+//
+
 import SwiftUI
 import AuthenticationServices
-import WeatherKit
 
-struct HomeView<Content>: View where Content: View {
-    @StateObject private var authViewModel = AuthenticationViewModel()
-    @StateObject private var closetViewModel = ClosetViewModel()
+
+
+struct HomeView<Content>: View where Content: View{
+    @StateObject private var viewModel = AuthenticationViewModel()
+    @State private var presentingLoginScreen = false
+    @State private var presentingProfileScreen = false
     @StateObject private var locationManager = LocationManager()
     @StateObject private var weatherManager = WeatherManager()
     
@@ -16,7 +25,10 @@ struct HomeView<Content>: View where Content: View {
     
     @State private var selectedTab: Tab = .closet
 
+
+
     var body: some View {
+
         ZStack(alignment: .bottom) {
             content()
 
@@ -24,37 +36,33 @@ struct HomeView<Content>: View where Content: View {
             Group {
                 switch selectedTab {
                 case .closet:
-                    ClosetView(viewModel: closetViewModel, weather: weatherManager.currentWeather, weatherError: weatherManager.errorMessage)
-                        .onAppear {
-                            locationManager.requestLocationPermission()
-                            Task {
-                                await closetViewModel.fetchClothes()
-                            }
+//                    VStack {
+                        // Weather View
+                    ScrollView() {
+                        // Weather View
+                        if let weather = weatherManager.currentWeather {
+                            WeatherCard(weather: weather)
+                                .padding(.vertical, 8)
+                        } else {
+                            Text("Loading weather…")
+                                .foregroundColor(.gray)
+                                .onAppear {
+                                    if let loc = locationManager.location {
+                                        Task {
+                                            await weatherManager.fetchWeather(for: loc)
+                                        }
+                                    }
+                                }
                         }
-                        .task(id: locationManager.location) {
-                            // This version of .task does not take a parameter.
-                            // We read the property from the @StateObject directly.
-                            if let location = locationManager.location {
-                                await weatherManager.fetchWeather(for: location)
-                            }
-                        }
-                        .task(id: weatherManager.currentWeather) {
-                            // This version of .task does not take a parameter.
-                            if let weather = weatherManager.currentWeather {
-                                let weatherRequest = WeatherRequest(
-                                    temperature: weather.temperature.converted(to: .fahrenheit).value,
-                                    condition: weather.condition.description
-                                )
-                                await closetViewModel.generateOutfits(weather: weatherRequest)
-                            }
-                        }
+                        ClosetView()
+                    }
                     
                 case .add:
                     ClothingUploadView()
                 case .profile:
                     NavigationView {
-                        UserProfileView()
-                            .environmentObject(authViewModel)
+                      UserProfileView()
+                        .environmentObject(viewModel)
                     }
                 }
             }
@@ -64,34 +72,87 @@ struct HomeView<Content>: View where Content: View {
             // Custom Tab Bar
             HStack {
                 Spacer()
-                Button(action: { selectedTab = .closet }) {
+
+                Button(action: {
+                    selectedTab = .closet
+                }) {
                     VStack {
                         Image(systemName: "tshirt.fill")
-                        Text("Closet").font(.caption2)
+                        Text("Closet")
+                            .font(.caption2)
                     }
                 }
                 .foregroundColor(selectedTab == .closet ? .blue : .gray)
+
                 Spacer()
-                Button(action: { selectedTab = .add }) {
+
+                Button(action: {
+
+                    selectedTab = .add
+                }) {
                     ZStack {
-                        Circle().foregroundColor(.blue).frame(width: 56, height: 56).shadow(radius: 4)
-                        Image(systemName: "plus").foregroundColor(.white).font(.system(size: 24, weight: .bold))
+                        Circle()
+                            .foregroundColor(.blue)
+                            .frame(width: 56, height: 56)
+                            .shadow(radius: 4)
+
+                        Image(systemName: "plus")
+                            .foregroundColor(.white)
+                            .font(.system(size: 24, weight: .bold))
                     }
                 }
+//                            .offset(y: -20)
+
                 Spacer()
-                Button(action: { selectedTab = .profile }) {
+
+                Button(action: {
+                    selectedTab = .profile
+                }) {
                     VStack {
                         Image(systemName: "person.crop.circle")
-                        Text("Profile").font(.caption2)
+                        Text("Profile")
+                        .font(.caption2)
                     }
                 }
                 .foregroundColor(selectedTab == .profile ? .blue : .gray)
+                .onReceive(NotificationCenter.default.publisher(for: ASAuthorizationAppleIDProvider.credentialRevokedNotification)) { event in
+//                signOut()
+                  if let userInfo = event.userInfo, let info = userInfo["info"] {
+                    print(info)
+                  }
+                }
+
                 Spacer()
             }
             .padding(.vertical, 10)
             .background(Color.white.ignoresSafeArea(edges: .bottom))
+//            .clipShape(RoundedRectangle(cornerRadius: 20))
             .shadow(color: .gray.opacity(0.2), radius: 5, y: -2)
             .offset(y:30)
         }
     }
+}
+
+// Placeholder Views
+//struct ClosetView: View {
+//    var body: some View {
+//        Text("Closet")
+//    }
+//}
+
+struct AddView: View {
+    var body: some View {
+        Text("Add New Item")
+    }
+}
+
+struct ProfileView: View {
+    var body: some View {
+        Text("Profile")
+    }
+}
+
+
+#Preview {
+//    HomeView(nil, nil)
 }

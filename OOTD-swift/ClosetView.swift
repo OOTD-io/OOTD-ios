@@ -1,148 +1,228 @@
+//
+//  ClosetView.swift
+//  OOTD-swift
+//
+//  Created by Rahqi Sarsour on 6/15/25.
+//
+
 import SwiftUI
-import WeatherKit
 
 struct ClosetView: View {
-    @ObservedObject var viewModel: ClosetViewModel
-    let weather: CurrentWeather?
-    let weatherError: String?
+    @State private var selectedItem: ClothingItem? = nil
+//    @StateObject private var locationManager = LocationManager()
+//    @StateObject private var weatherManager = WeatherManager()
 
-    // This computed property will derive the available categories
-    private var availableCategories: [ClothingCategory] {
-        let categories = Set(viewModel.clothingItems.map { $0.uiCategory })
-        // A specific, logical order for the UI
-        let desiredOrder: [ClothingCategory] = [.top, .bottom, .dress, .outerwear, .shoes, .accessory, .unknown]
-        return categories.sorted { cat1, cat2 in
-            guard let firstIndex = desiredOrder.firstIndex(of: cat1),
-                  let secondIndex = desiredOrder.firstIndex(of: cat2) else {
-                return false
-            }
-            return firstIndex < secondIndex
-        }
-    }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                // 1. Weather Section
-                if let weather = weather {
-                    WeatherCard(weather: weather)
-                        .padding(.horizontal)
-                } else if let weatherError = weatherError {
-                    Text(weatherError)
-                        .foregroundColor(.red)
-                        .padding()
-                } else {
+//        NavigationStack {
+//            ScrollView() {
+                VStack {
+                    //                HStack {
+                    //                    Text("Generate Outfit")
+                    //                        .font(.largeTitle)
+                    //                        .frame(width: 200, height: 200)
+                    //                        .background(.red)
+                    //
+                    //                    Text("Weather")
+                    //                        .font(.largeTitle)
+                    //                        .frame(width: 200, height: 200)
+                    //                        .background(.red)
+                    //                }
+                    Spacer()
                     HStack {
                         Spacer()
-                        Text("Loading Weather...")
-                        ProgressView()
-                        Spacer()
-                    }
-                    .padding()
-                }
+                        VStack(alignment: .leading) {
+                            HStack {
+                                Spacer()
+                                Text("Suggested Outfits")
+                                    .font(.title)
+                                    .fontWeight(.bold)
+                                Spacer()
+                            }
 
-                // 2. Generated Outfits Section
-                if viewModel.isLoadingOutfits {
+
+                            ForEach(0..<2) { index in
+                                HStack {
+                                    Spacer()
+                                    ForEach(index..<index+2) { i1 in
+                                        Text("Generated Outfit \(index)")
+                                            .font(.largeTitle)
+                                            .frame(width: 150, height: 150)
+                                            .background(.red)
+                                        Spacer()
+                                    }
+                                    Spacer()
+                                }
+                            }
+
+                        }
+                        //                    Spacer()
+                        //                    Text("Generated Outfit")
+                        //                        .font(.largeTitle)
+                        //                        .frame(width: 150, height: 150)
+                        //                        .background(.red)
+                        //                    Spacer()
+                        //                    Text("Saved Outfits")
+                        //                        .font(.largeTitle)
+                        //                        .frame(width: 150, height: 150)
+                        //                        .background(.red)
+                        //                    Spacer()
+                    }
                     HStack {
                         Spacer()
-                        ProgressView("Generating Outfits...")
-                        Spacer()
-                    }
-                } else if !viewModel.outfitViewModels.isEmpty {
-                    VStack(alignment: .leading) {
-                        HStack {
-                            Text("Generated Outfits")
-                                .font(.title2).bold()
-                            Spacer()
-                            if let weather = weather {
-                                Button("Regenerate") {
-                                    Task {
-                                        let weatherRequest = WeatherRequest(
-                                            temperature: weather.temperature.converted(to: .fahrenheit).value,
-                                            condition: weather.condition.description
-                                        )
-                                        await viewModel.forceRegenerateOutfits(weather: weatherRequest)
-                                    }
+                        VStack(alignment: .leading) {
+                            let item = ClothingItem(category: "Tops", name: "Shirt", size: "Medium", image: Image(systemName: "tshirt"), sceneImage: "harry_potter_uniform.scn")
+                            HStack {
+
+                                Text("👕 Tops")
+                                    .font(.title)
+                                    .fontWeight(.bold)
+                                Spacer()
+                                Spacer()
+                                Spacer()
+                                NavigationLink("See All →") {
+                                    ClothingListView(title: "tops", items: [item])
                                 }
                                 .font(.subheadline)
+                                .padding(EdgeInsets(top: 15, leading: 0, bottom: 0, trailing: 10))
+                                .background(Color.clear)
+                                .foregroundColor(.black)
+                                .cornerRadius(10)
+
+                            }
+
+                            ScrollView(.horizontal) {
+                                HStack(spacing: 20) {
+                                    ForEach(0..<5) { index in
+                                        ClothingNavigationTile(clothing: item, isLarge: false)
+
+//                                        NavigationLink(destination: ClothingDetailView(clothing: item)) {
+//                                            ClothingTile(clothing: item)
+//                                        }
+//                                        ClothingTile(item: item)
+//                                            .onTapGesture {
+//                                            selectedItem = item
+//                                        }
+                                        //                                    Text("Item \(index)")
+                                        //                                        .font(.largeTitle)
+                                        //                                        .frame(width: 100, height: 100)
+                                        //                                        .background(.red)
+                                    }
+                                }
+
                             }
                         }
-                        .padding(.horizontal)
+                    }
+                    .padding(EdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 0))
 
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 150))], spacing: 20) {
-                            ForEach(viewModel.outfitViewModels) { outfitVM in
-                                OutfitTileView(outfitViewModel: outfitVM)
+                    HStack {
+                        Spacer()
+                        VStack(alignment: .leading) {
+                            let item = ClothingItem(category: "Bottoms", name: "jeans", size: "32", image: Image(systemName: "figure.walk"), sceneImage: nil)
+                            HStack{
+                                Text("👖 Bottoms")
+                                    .font(.title)
+                                    .fontWeight(.bold)
+
+                                Spacer()
+                                Spacer()
+                                Spacer()
+                                NavigationLink("See All →") {
+                                    ClothingListView(title: "bottoms", items: [item])
+                                }
+                                .font(.subheadline)
+                                .padding(EdgeInsets(top: 15, leading: 0, bottom: 0, trailing: 10))
+                                .background(Color.clear)
+                                .foregroundColor(.black)
+                                .cornerRadius(10)
+                                //                            NavigationLink(action: {
+                                //                                ClothingListView(title: "bottoms", items: [item])
+                                //                            }) {
+                                //                                Text("See All →")
+                                //                                    .font(.subheadline)
+                                //                                    .padding(EdgeInsets(top: 15, leading: 0, bottom: 0, trailing: 10))
+                                //                                    .background(Color.clear)
+                                //                                    .foregroundColor(.black)
+                                //                                    .cornerRadius(10)
+                                //                            }
+                            }
+
+                            ScrollView(.horizontal) {
+                                HStack(spacing: 20) {
+
+                                    ForEach(0..<5) { index in
+                                        ClothingNavigationTile(clothing: item, isLarge: false)
+//                                        NavigationLink(destination: ClothingDetailView(clothing: item)) {
+//                                            ClothingTile(clothing: item)
+//                                        }
+//                                        ClothingTile(item: item)
+//                                            .onTapGesture {
+//                                                selectedItem = item
+//                                            }
+                                    }
+                                }
+
                             }
                         }
-                        .padding(.horizontal)
                     }
-                }
+                    .padding(EdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 0))
 
-                // 3. Individual Clothing Sections
-                if viewModel.isLoadingClothes {
-                     HStack {
+
+                    HStack {
                         Spacer()
-                        ProgressView("Loading Your Closet...")
-                        Spacer()
-                    }
-                } else if let errorMessage = viewModel.errorMessage {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .padding()
-                } else {
-                    ForEach(availableCategories, id: \.self) { category in
-                        clothingSection(for: category)
-                    }
-                }
-            }
-            .padding(.vertical)
-        }
-    }
+                        VStack(alignment: .leading) {
+                            let item = ClothingItem(category:  "Shoes", name: "Sneakers", size: "10", image: Image(systemName: "shoeprints.fill"), sceneImage: nil)
+                            HStack{
+                                Text("👟 Shoes")
+                                    .font(.title)
+                                    .fontWeight(.bold)
 
-    @ViewBuilder
-    private func clothingSection(for category: ClothingCategory) -> some View {
-        let items = viewModel.clothingItems.filter { $0.uiCategory == category }
+                                Spacer()
+                                Spacer()
+                                Spacer()
+                                NavigationLink("See All →") {
+                                    ClothingListView(title: "bottoms", items: [item])
+                                }
+                                .font(.subheadline)
+                                .padding(EdgeInsets(top: 15, leading: 0, bottom: 0, trailing: 10))
+                                .background(Color.clear)
+                                .foregroundColor(.black)
+                                .cornerRadius(10)
+                            }
 
-        if !items.isEmpty {
-            VStack(alignment: .leading) {
-                HStack {
-                    Text("\(emoji(for: category)) \(category.rawValue)")
-                        .font(.title2)
-                        .fontWeight(.bold)
+                            ScrollView(.horizontal) {
+                                HStack(spacing: 20) {
+                                    ForEach(0..<5) { index in
+                                        ClothingNavigationTile(clothing: item, isLarge: false)
+//                                        NavigationLink(destination: ClothingDetailView(clothing: item)) {
+//                                            ClothingTile(clothing: item)
+//                                        }
+//                                        ClothingTile(item: item)
+//                                            .onTapGesture {
+//                                                selectedItem = item
+//                                            }
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                    .padding(EdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 0))
+
+
                     Spacer()
-                    NavigationLink("See All →") {
-                        ClothingListView(title: category.rawValue, items: items)
-                    }
-                    .font(.subheadline)
-                }
-                .padding(.horizontal)
 
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 15) {
-                        ForEach(items) { item in
-                            ClothingNavigationTile(clothing: item, isLarge: false)
-                        }
-                    }
-                    .padding(.horizontal)
                 }
-            }
-            .padding(.vertical, 10)
-        }
-    }
-
-    private func emoji(for category: ClothingCategory) -> String {
-        switch category {
-        case .top: "👕"
-        case .bottom: "👖"
-        case .dress: "👗"
-        case .shoes: "👟"
-        case .accessory: "👜"
-        case .outerwear: "🧥"
-        case .unknown: "✨"
-        }
+//            }
+            .padding(EdgeInsets(top: 0, leading: 0, bottom: 50, trailing: 0))
+//        }
+//        .navigationTitle("FUCK ME")
+//        .fullScreenCover(item: $selectedItem, onDismiss: .none) { item in
+//            ClothingDetailView(item: item)
+//        }
     }
 }
 
 #Preview {
-    ClosetView(viewModel: ClosetViewModel(), weather: nil, weatherError: "Could not load weather.")
+    ClosetView()
 }

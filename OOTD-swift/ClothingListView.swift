@@ -16,8 +16,12 @@ struct ClothingListView: View {
     var body: some View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 20)], spacing: 20) {
-                ForEach(items) { item in
-                    ClothingNavigationTile(clothing: item, isLarge: true)
+                ForEach(0..<20) { _ in
+                    ClothingNavigationTile(clothing: items[0], isLarge: false)
+//                    ClothingTile(item: items[0], isLarge: true)
+//                        .onTapGesture {
+//                            selectedItem = items[0]
+//                        }
                 }
             }
             .padding()
