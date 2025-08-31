@@ -40,12 +40,14 @@ class AuthenticationViewModel: ObservableObject {
   @Published var isUpdatingPassword = false
   @Published var passwordUpdateErrorMessage: String? = nil
 
-  // Use Any? to let the compiler infer the type and avoid build errors.
   private var authStateHandler: Any?
   private var currentNonce: String?
 
   init() {
-    registerAuthStateHandler()
+    // Kick off the async state handler registration from the synchronous initializer
+    Task {
+        await self.registerAuthStateHandler()
+    }
 
     $flow
       .combineLatest($email, $password, $confirmPassword)
@@ -57,22 +59,23 @@ class AuthenticationViewModel: ObservableObject {
       .assign(to: &$isValid)
   }
 
-  // deinit is removed to avoid potential issues with the listener handle type.
-  // The listener lives as long as the ViewModel.
-
-  func registerAuthStateHandler() {
+  // MARK: - Auth State
+  func registerAuthStateHandler() async {
       if authStateHandler == nil {
-          authStateHandler = supabase.auth.onAuthStateChange { [weak self] (event, session) in
+          authStateHandler = await supabase.auth.onAuthStateChange { [weak self] (event, session) in
               guard let self = self else { return }
 
-              // The compiler error indicates `session` is not optional.
-              guard let session = session else { return }
+              guard let session = session else {
+                  if event == .signedOut {
+                      Task { await MainActor.run { self.authenticationState = .unauthenticated } }
+                  }
+                  return
+              }
 
               Task {
                   await MainActor.run {
                       switch event {
                       case .initialSession, .signedIn, .userUpdated:
-                          // The compiler error indicates `session.user` is not optional.
                           self.user = session.user
                           self.authenticationState = .authenticated
                           self.displayName = session.user.email ?? ""
@@ -84,6 +87,9 @@ class AuthenticationViewModel: ObservableObject {
                       case .passwordRecovery:
                           self.needsPasswordReset = true
                       case .tokenRefreshed:
+                          break
+                      @unknown default:
+                          print("Unhandled auth event: \(event)")
                           break
                       }
                   }
