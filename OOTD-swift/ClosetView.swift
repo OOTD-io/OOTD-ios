@@ -67,6 +67,7 @@ struct ClosetView: View {
             }
         }
         .onAppear {
+            print("[ClosetView] .onAppear called. Fetching data.")
             viewModel.fetchData(weatherManager: weatherManager)
         }
     }

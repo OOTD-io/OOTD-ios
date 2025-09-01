@@ -19,12 +19,18 @@ class AIEngineService {
     }
 
     private func performRequest<T: Decodable>(request: URLRequest) async throws -> T {
+        print("[AIEngineService] Performing request to: \(request.url?.absoluteString ?? "N/A")")
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
+            print("[AIEngineService] Error: Did not receive a valid HTTP response.")
             throw URLError(.badServerResponse)
         }
 
+        print("[AIEngineService] Received HTTP status code: \(httpResponse.statusCode)")
+
         guard (200...299).contains(httpResponse.statusCode) else {
+            let errorBody = String(data: data, encoding: .utf8) ?? "No response body"
+            print("[AIEngineService] Error: Server returned status \(httpResponse.statusCode). Body: \(errorBody)")
             // Try to decode an error message from the body
             if let errorDetail = try? JSONDecoder().decode(APIErrorDetail.self, from: data) {
                 throw APIError.serverError(message: errorDetail.detail)
@@ -32,6 +38,7 @@ class AIEngineService {
             throw URLError(URLError.Code(rawValue: httpResponse.statusCode))
         }
 
+        print("[AIEngineService] Request successful. Attempting to decode response.")
         return try JSONDecoder().decode(T.self, from: data)
     }
 
