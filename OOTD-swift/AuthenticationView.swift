@@ -43,14 +43,6 @@ struct AuthenticationView: View {
           .environmentObject(viewModel)
       }
     }
-    .sheet(isPresented: $viewModel.isShowingForgotPassword) {
-        ForgotPasswordView()
-            .environmentObject(viewModel)
-    }
-    .sheet(isPresented: $viewModel.needsPasswordReset) {
-        ResetPasswordView()
-            .environmentObject(viewModel)
-    }
   }
 }
 

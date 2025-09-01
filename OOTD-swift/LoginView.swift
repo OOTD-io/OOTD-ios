@@ -88,16 +88,6 @@ struct LoginView: View {
       .background(Divider(), alignment: .bottom)
       .padding(.bottom, 8)
 
-      HStack {
-        Spacer()
-        Button(action: { viewModel.isShowingForgotPassword.toggle() }) {
-          Text("Forgot Password?")
-            .fontWeight(.semibold)
-            .foregroundColor(.blue)
-        }
-      }
-      .padding(.bottom, 16)
-
       if !viewModel.errorMessage.isEmpty {
         VStack {
           Text(viewModel.errorMessage)

@@ -54,7 +54,7 @@ struct HomeView<Content>: View where Content: View{
                                     }
                                 }
                         }
-                        ClosetView()
+                        ClosetView(weatherManager: weatherManager)
                     }
                     
                 case .add:

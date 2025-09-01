@@ -1,21 +1,12 @@
-//
-//  ClothingUploadView.swift
-//  OOTD-swift
-//
-//  Created by Rahqi Sarsour on 6/16/25.
-//
-
 import SwiftUI
 import PhotosUI
 
 struct ClothingUploadView: View {
+    @StateObject private var viewModel = ClothingUploadViewModel()
+
     @State private var frontImage: UIImage?
     @State private var backImage: UIImage?
     @State private var tagImage: UIImage?
-
-    @State private var frontItem: PhotosPickerItem?
-    @State private var backItem: PhotosPickerItem?
-    @State private var tagItem: PhotosPickerItem?
 
     @State private var showCamera = false
     @State private var activeCameraTarget: String?
@@ -28,23 +19,44 @@ struct ClothingUploadView: View {
                 .padding(.top)
 
             HStack(spacing: 20) {
-                UploadTile(title: "Front", image: $frontImage, onSelectPhoto: {
-                    pickPhoto(for: "front")
-                }, onTakePhoto: {
-                    openCamera(for: "front")
-                })
+                UploadTile(title: "Front", image: $frontImage, onSelectPhoto: { pickPhoto(for: "front") }, onTakePhoto: { openCamera(for: "front") })
+                UploadTile(title: "Back", image: $backImage, onSelectPhoto: { pickPhoto(for: "back") }, onTakePhoto: { openCamera(for: "back") })
+                UploadTile(title: "Tag", image: $tagImage, onSelectPhoto: { pickPhoto(for: "tag") }, onTakePhoto: { openCamera(for: "tag") })
+            }
 
-                UploadTile(title: "Back", image: $backImage, onSelectPhoto: {
-                    pickPhoto(for: "back")
-                }, onTakePhoto: {
-                    openCamera(for: "back")
-                })
+            if viewModel.isLoading {
+                ProgressView("Uploading...")
+                    .padding()
+            } else {
+                Button(action: upload) {
+                    Text("Analyze and Save Clothing")
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(frontImage == nil ? Color.gray : Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .disabled(frontImage == nil)
+                .padding()
+            }
 
-                UploadTile(title: "Tag", image: $tagImage, onSelectPhoto: {
-                    pickPhoto(for: "tag")
-                }, onTakePhoto: {
-                    openCamera(for: "tag")
-                })
+            if let errorMessage = viewModel.errorMessage {
+                Text(errorMessage)
+                    .foregroundColor(.red)
+                    .padding()
+            }
+
+            if viewModel.isSuccess {
+                Text("Upload successful! The AI is analyzing your item.")
+                    .foregroundColor(.green)
+                    .padding()
+                    .onAppear {
+                        // Reset after a delay
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                            resetForm()
+                        }
+                    }
             }
 
             Spacer()
@@ -56,37 +68,50 @@ struct ClothingUploadView: View {
                 applyImage(capturedImage, to: activeCameraTarget)
             }
         }
-        .onChange(of: selectedPickerItem) {
-            loadPickerImage()
-        }
+        .onChange(of: selectedPickerItem, perform: loadPickerImage)
     }
 
-    // MARK: Picker Handling
+    // MARK: - Actions
+    private func upload() {
+        viewModel.uploadClothing(frontImage: frontImage, backImage: backImage, tagImage: tagImage)
+    }
+
+    private func resetForm() {
+        frontImage = nil
+        backImage = nil
+        tagImage = nil
+        viewModel.isSuccess = false
+        viewModel.errorMessage = nil
+    }
+
+    // MARK: - Picker Handling
     @State private var showingPicker = false
     @State private var selectedPickerItem: PhotosPickerItem?
 
-    func pickPhoto(for type: String) {
+    private func pickPhoto(for type: String) {
         activeCameraTarget = type
         showingPicker = true
     }
 
-    func loadPickerImage() {
-        guard let item = selectedPickerItem else { return }
+    private func loadPickerImage(oldValue: PhotosPickerItem?, newValue: PhotosPickerItem?) {
+        guard let item = newValue else { return }
         Task {
             if let data = try? await item.loadTransferable(type: Data.self),
                let uiImage = UIImage(data: data) {
-                applyImage(uiImage, to: activeCameraTarget)
+                await MainActor.run {
+                    applyImage(uiImage, to: activeCameraTarget)
+                }
             }
         }
     }
 
-    // MARK: Camera Handling
-    func openCamera(for type: String) {
+    // MARK: - Camera Handling
+    private func openCamera(for type: String) {
         activeCameraTarget = type
         showCamera = true
     }
 
-    func applyImage(_ image: UIImage?, to target: String?) {
+    private func applyImage(_ image: UIImage?, to target: String?) {
         guard let image else { return }
         switch target {
         case "front": frontImage = image

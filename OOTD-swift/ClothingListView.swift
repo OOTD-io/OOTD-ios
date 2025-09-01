@@ -1,27 +1,29 @@
-//
-//  ClothingListView.swift
-//  OOTD-swift
-//
-//  Created by Rahqi Sarsour on 6/16/25.
-//
-
 import SwiftUI
 
 struct ClothingListView: View {
     let title: String
     let items: [ClothingItem]
-    @State private var selectedItem: ClothingItem? = nil
     @Environment(\.dismiss) var dismiss
+
+    private let columns = [
+        GridItem(.adaptive(minimum: 150), spacing: 16)
+    ]
 
     var body: some View {
         ScrollView {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 20)], spacing: 20) {
-                ForEach(0..<20) { _ in
-                    ClothingNavigationTile(clothing: items[0], isLarge: false)
-//                    ClothingTile(item: items[0], isLarge: true)
-//                        .onTapGesture {
-//                            selectedItem = items[0]
-//                        }
+            LazyVGrid(columns: columns, spacing: 16) {
+                ForEach(items) { item in
+                    NavigationLink(destination: ClothingDetailView(clothing: item)) {
+                        AsyncImage(url: URL(string: item.images.front)) { image in
+                            image.resizable()
+                                .aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Color.gray.opacity(0.1).overlay(ProgressView())
+                        }
+                        .frame(minWidth: 0, maxWidth: .infinity)
+                        .frame(height: 200)
+                        .cornerRadius(12)
+                    }
                 }
             }
             .padding()
@@ -31,27 +33,15 @@ struct ClothingListView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
-                    // Handle dismiss (via pop)
                     dismiss()
                 }) {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .semibold))
                         Text("Back")
-                            .font(.system(size: 16, weight: .medium))
                     }
-                    .foregroundColor(Color.primary) // Or your custom color
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 12)
-//                    .background(
-//                        RoundedRectangle(cornerRadius: 10)
-//                            .fill(Color(UIColor.systemGray5))
-//                    )
+                    .foregroundColor(.primary)
                 }
             }
         }
-//        .sheet(item: $selectedItem) {
-//            ClothingDetailView(item: $0)
-//        }
     }
 }

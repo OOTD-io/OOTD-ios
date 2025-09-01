@@ -1,228 +1,149 @@
-//
-//  ClosetView.swift
-//  OOTD-swift
-//
-//  Created by Rahqi Sarsour on 6/15/25.
-//
-
 import SwiftUI
 
 struct ClosetView: View {
-    @State private var selectedItem: ClothingItem? = nil
-//    @StateObject private var locationManager = LocationManager()
-//    @StateObject private var weatherManager = WeatherManager()
+    @StateObject private var viewModel = ClosetViewModel()
+    @ObservedObject var weatherManager: WeatherManager
 
+    // Group clothing items by category for display
+    private var clothingByCategory: [String: [ClothingItem]] {
+        Dictionary(grouping: viewModel.clothingItems, by: { $0.type })
+    }
+
+    // Define a consistent order for categories
+    private let categoryOrder: [String] = ["shirt", "pants", "shoes", "dress", "outerwear", "accessory"]
 
     var body: some View {
-//        NavigationStack {
-//            ScrollView() {
+        VStack {
+            if viewModel.isLoading {
+                ProgressView("Loading Your Closet...")
+                    .padding()
+            } else if let errorMessage = viewModel.errorMessage {
                 VStack {
-                    //                HStack {
-                    //                    Text("Generate Outfit")
-                    //                        .font(.largeTitle)
-                    //                        .frame(width: 200, height: 200)
-                    //                        .background(.red)
-                    //
-                    //                    Text("Weather")
-                    //                        .font(.largeTitle)
-                    //                        .frame(width: 200, height: 200)
-                    //                        .background(.red)
-                    //                }
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        VStack(alignment: .leading) {
-                            HStack {
-                                Spacer()
-                                Text("Suggested Outfits")
-                                    .font(.title)
-                                    .fontWeight(.bold)
-                                Spacer()
-                            }
-
-
-                            ForEach(0..<2) { index in
-                                HStack {
-                                    Spacer()
-                                    ForEach(index..<index+2) { i1 in
-                                        Text("Generated Outfit \(index)")
-                                            .font(.largeTitle)
-                                            .frame(width: 150, height: 150)
-                                            .background(.red)
-                                        Spacer()
-                                    }
-                                    Spacer()
-                                }
-                            }
-
-                        }
-                        //                    Spacer()
-                        //                    Text("Generated Outfit")
-                        //                        .font(.largeTitle)
-                        //                        .frame(width: 150, height: 150)
-                        //                        .background(.red)
-                        //                    Spacer()
-                        //                    Text("Saved Outfits")
-                        //                        .font(.largeTitle)
-                        //                        .frame(width: 150, height: 150)
-                        //                        .background(.red)
-                        //                    Spacer()
+                    Text("Error")
+                        .font(.headline)
+                        .foregroundColor(.red)
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .padding()
+                    Button("Retry") {
+                        viewModel.fetchData(weatherManager: weatherManager)
                     }
-                    HStack {
-                        Spacer()
-                        VStack(alignment: .leading) {
-                            let item = ClothingItem(category: "Tops", name: "Shirt", size: "Medium", image: Image(systemName: "tshirt"), sceneImage: "harry_potter_uniform.scn")
-                            HStack {
-
-                                Text("👕 Tops")
-                                    .font(.title)
-                                    .fontWeight(.bold)
-                                Spacer()
-                                Spacer()
-                                Spacer()
-                                NavigationLink("See All →") {
-                                    ClothingListView(title: "tops", items: [item])
-                                }
-                                .font(.subheadline)
-                                .padding(EdgeInsets(top: 15, leading: 0, bottom: 0, trailing: 10))
-                                .background(Color.clear)
-                                .foregroundColor(.black)
-                                .cornerRadius(10)
-
-                            }
-
-                            ScrollView(.horizontal) {
-                                HStack(spacing: 20) {
-                                    ForEach(0..<5) { index in
-                                        ClothingNavigationTile(clothing: item, isLarge: false)
-
-//                                        NavigationLink(destination: ClothingDetailView(clothing: item)) {
-//                                            ClothingTile(clothing: item)
-//                                        }
-//                                        ClothingTile(item: item)
-//                                            .onTapGesture {
-//                                            selectedItem = item
-//                                        }
-                                        //                                    Text("Item \(index)")
-                                        //                                        .font(.largeTitle)
-                                        //                                        .frame(width: 100, height: 100)
-                                        //                                        .background(.red)
-                                    }
-                                }
-
-                            }
-                        }
-                    }
-                    .padding(EdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 0))
-
-                    HStack {
-                        Spacer()
-                        VStack(alignment: .leading) {
-                            let item = ClothingItem(category: "Bottoms", name: "jeans", size: "32", image: Image(systemName: "figure.walk"), sceneImage: nil)
-                            HStack{
-                                Text("👖 Bottoms")
-                                    .font(.title)
-                                    .fontWeight(.bold)
-
-                                Spacer()
-                                Spacer()
-                                Spacer()
-                                NavigationLink("See All →") {
-                                    ClothingListView(title: "bottoms", items: [item])
-                                }
-                                .font(.subheadline)
-                                .padding(EdgeInsets(top: 15, leading: 0, bottom: 0, trailing: 10))
-                                .background(Color.clear)
-                                .foregroundColor(.black)
-                                .cornerRadius(10)
-                                //                            NavigationLink(action: {
-                                //                                ClothingListView(title: "bottoms", items: [item])
-                                //                            }) {
-                                //                                Text("See All →")
-                                //                                    .font(.subheadline)
-                                //                                    .padding(EdgeInsets(top: 15, leading: 0, bottom: 0, trailing: 10))
-                                //                                    .background(Color.clear)
-                                //                                    .foregroundColor(.black)
-                                //                                    .cornerRadius(10)
-                                //                            }
-                            }
-
-                            ScrollView(.horizontal) {
-                                HStack(spacing: 20) {
-
-                                    ForEach(0..<5) { index in
-                                        ClothingNavigationTile(clothing: item, isLarge: false)
-//                                        NavigationLink(destination: ClothingDetailView(clothing: item)) {
-//                                            ClothingTile(clothing: item)
-//                                        }
-//                                        ClothingTile(item: item)
-//                                            .onTapGesture {
-//                                                selectedItem = item
-//                                            }
-                                    }
-                                }
-
-                            }
-                        }
-                    }
-                    .padding(EdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 0))
-
-
-                    HStack {
-                        Spacer()
-                        VStack(alignment: .leading) {
-                            let item = ClothingItem(category:  "Shoes", name: "Sneakers", size: "10", image: Image(systemName: "shoeprints.fill"), sceneImage: nil)
-                            HStack{
-                                Text("👟 Shoes")
-                                    .font(.title)
-                                    .fontWeight(.bold)
-
-                                Spacer()
-                                Spacer()
-                                Spacer()
-                                NavigationLink("See All →") {
-                                    ClothingListView(title: "bottoms", items: [item])
-                                }
-                                .font(.subheadline)
-                                .padding(EdgeInsets(top: 15, leading: 0, bottom: 0, trailing: 10))
-                                .background(Color.clear)
-                                .foregroundColor(.black)
-                                .cornerRadius(10)
-                            }
-
-                            ScrollView(.horizontal) {
-                                HStack(spacing: 20) {
-                                    ForEach(0..<5) { index in
-                                        ClothingNavigationTile(clothing: item, isLarge: false)
-//                                        NavigationLink(destination: ClothingDetailView(clothing: item)) {
-//                                            ClothingTile(clothing: item)
-//                                        }
-//                                        ClothingTile(item: item)
-//                                            .onTapGesture {
-//                                                selectedItem = item
-//                                            }
-                                    }
-                                }
-
-                            }
-                        }
-                    }
-                    .padding(EdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 0))
-
-
-                    Spacer()
-
                 }
-//            }
-            .padding(EdgeInsets(top: 0, leading: 0, bottom: 50, trailing: 0))
-//        }
-//        .navigationTitle("FUCK ME")
-//        .fullScreenCover(item: $selectedItem, onDismiss: .none) { item in
-//            ClothingDetailView(item: item)
-//        }
+            } else {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 24) {
+                        // Suggested Outfits Section
+                        VStack(alignment: .leading) {
+                            Text("Suggested Outfits")
+                                .font(.title.bold())
+                                .padding(.horizontal)
+
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 16) {
+                                    if viewModel.generatedOutfits.isEmpty {
+                                        Text("No outfits to suggest right now.")
+                                            .foregroundColor(.secondary)
+                                            .padding()
+                                            .frame(height: 100)
+                                    } else {
+                                        ForEach(viewModel.generatedOutfits) { outfit in
+                                            OutfitTileView(outfit: outfit)
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
+                        }
+
+                        // Clothing Categories Section
+                        ForEach(categoryOrder, id: \.self) { category in
+                            if let items = clothingByCategory[category], !items.isEmpty {
+                                ClothingCategoryRow(title: category.capitalized, items: items)
+                            }
+                        }
+                    }
+                    .padding(.vertical)
+                }
+            }
+        }
+        .onAppear {
+            viewModel.fetchData(weatherManager: weatherManager)
+        }
+    }
+}
+
+// A tile representing a single generated outfit
+struct OutfitTileView: View {
+    let outfit: Outfit
+
+    var body: some View {
+        VStack {
+            AsyncImage(url: URL(string: outfit.image_url)) { image in
+                image.resizable().aspectRatio(contentMode: .fill)
+            } placeholder: {
+                Color.gray.opacity(0.1).overlay(ProgressView())
+            }
+            .frame(width: 150, height: 150)
+            .cornerRadius(12)
+
+            Text(outfit.category.capitalized)
+                .font(.headline)
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
+    }
+}
+
+// A row for a single category of clothing items
+struct ClothingCategoryRow: View {
+    let title: String
+    let items: [ClothingItem]
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            HStack {
+                Text(title)
+                    .font(.title2.bold())
+                Spacer()
+                // NavigationLink("See All →") {
+                //     // The destination view needs to be updated to accept the new ClothingItem model
+                //     // ClothingListView(title: title, items: items)
+                // }
+            }
+            .padding(.horizontal)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 15) {
+                    ForEach(items) { item in
+                        NavigationLink(destination: ClothingDetailView(clothing: item)) {
+                            AsyncImage(url: URL(string: item.images.front)) { image in
+                                image.resizable().aspectRatio(contentMode: .fill)
+                            } placeholder: {
+                                Color.gray.opacity(0.1).overlay(ProgressView())
+                            }
+                            .frame(width: 110, height: 110)
+                            .cornerRadius(8)
+                        }
+                    }
+                }
+                .padding(.horizontal)
+            }
+        }
+    }
+}
+
+// A dummy WeatherManager for previews
+class PreviewWeatherManager: WeatherManager {
+    override init() {
+        super.init()
     }
 }
 
 #Preview {
-    ClosetView()
+    NavigationView {
+        ClosetView(weatherManager: PreviewWeatherManager())
+            .environmentObject(AuthenticationViewModel())
+    }
 }

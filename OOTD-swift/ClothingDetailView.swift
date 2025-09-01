@@ -1,82 +1,72 @@
-//
-//  ClothingDetailView.swift
-//  OOTD-swift
-//
-//  Created by Rahqi Sarsour on 6/16/25.
-//
-
-import SwiftUICore
 import SwiftUI
-import SceneKit
-import RealityKit
 
 struct ClothingDetailView: View {
-    let item: ClothingItem
+    let clothing: ClothingItem
     @Environment(\.dismiss) private var dismiss
-
-
 
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                //            if let filename = item.usdzFilename,
-                //            Bundle.main.url(forResource: <#T##String?#>, withExtension: <#T##String?#>)
-                //            let url = Bundle.main.url(forResource: "harry_potter_uniform", withExtension: "usdz")
-                //            USDZPreview(usdzURL: url!)
-                //                    .frame(height: 300)
-                //                    .cornerRadius(12)
-                //                    .padding(.top)
-                //            ARModelView(modelName: "harry_potter_uniform")
-                if let sceneName = item.sceneImage {
-                    SceneKitView(modelName: sceneName)
-//                        .ignoresSafeArea()
-                                    .frame(height: 300)
-                    //                .cornerRadius(12)
-                    //                .padding()
-                    //                .background(.clear)
-                } else {
-                    item.image
-                        .resizable()
+                // Display the front image from the URL
+                AsyncImage(url: URL(string: clothing.images.front)) { image in
+                    image.resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(height: 200)
-                        .cornerRadius(16)
-                        .padding(.top)
+                } placeholder: {
+                    ProgressView()
                 }
+                .frame(height: 300)
+                .cornerRadius(12)
+                .padding(.top)
                 
+                // Display clothing details from the new model
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(clothing.type.capitalized)
+                        .font(.largeTitle.bold())
+                    Text(clothing.subtype)
+                        .font(.title2)
+                        .foregroundColor(.secondary)
 
-                Text(item.name)
-                    .font(.title2)
-                    .bold()
-                
-                Text("Size: \(item.size)")
-                    .font(.body)
+                    HStack {
+                        Text("Color:")
+                            .fontWeight(.semibold)
+                        Text(clothing.color)
+                    }
+
+                    if let brand = clothing.brand {
+                        HStack {
+                            Text("Brand:")
+                                .fontWeight(.semibold)
+                            Text(brand)
+                        }
+                    }
+
+                    if let size = clothing.size {
+                        HStack {
+                            Text("Size:")
+                                .fontWeight(.semibold)
+                            Text(size)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 
                 Spacer()
             }
         }
         .padding()
-        .navigationTitle("Details")
+        .navigationTitle("Item Details")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
-                    // Handle dismiss (via pop)
                     dismiss()
                 }) {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .semibold))
                         Text("Back")
-                            .font(.system(size: 16, weight: .medium))
                     }
-                    .foregroundColor(Color.primary) // Or your custom color
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 12)
-//                    .background(
-//                        RoundedRectangle(cornerRadius: 10)
-//                            .fill(Color(UIColor.systemGray5))
-//                    )
+                    .foregroundColor(.primary)
                 }
             }
         }
