@@ -64,18 +64,20 @@ class AuthenticationViewModel: ObservableObject {
           authStateHandler = await supabase.auth.onAuthStateChange { [weak self] (event, session) in
               guard let self = self else { return }
 
-              if let user = session?.user {
-                  self.user = user
-                  self.authenticationState = .authenticated
-                  self.displayName = user.email ?? ""
-              } else {
-                  self.user = nil
-                  self.authenticationState = .unauthenticated
-                  self.displayName = ""
-              }
+              Task { @MainActor in
+                  if let user = session?.user {
+                      self.user = user
+                      self.authenticationState = .authenticated
+                      self.displayName = user.email ?? ""
+                  } else {
+                      self.user = nil
+                      self.authenticationState = .unauthenticated
+                      self.displayName = ""
+                  }
 
-              if event == .passwordRecovery {
-                  self.needsPasswordReset = true
+                  if event == .passwordRecovery {
+                      self.needsPasswordReset = true
+                  }
               }
           }
       }
