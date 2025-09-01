@@ -11,8 +11,8 @@ struct ClothingNavigationTile: View {
     let isLarge: Bool?
 
     var body: some View {
-        NavigationLink(destination: ClothingDetailView(item: clothing)) {
-            ClothingTile(item: clothing, isLarge: isLarge ?? false )
+        NavigationLink(destination: ClothingDetailView(clothing: clothing)) {
+            ClothingTile(clothing: clothing, isLarge: isLarge ?? false )
         }
         .foregroundStyle(.primary)
     }
