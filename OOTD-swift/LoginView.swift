@@ -39,6 +39,8 @@ struct LoginView: View {
   @Environment(\.colorScheme) var colorScheme
   @Environment(\.dismiss) var dismiss
 
+  @State private var isShowingForgotPassword = false
+
   @FocusState private var focus: FocusableField?
 
   private func signInWithEmailPassword() {
@@ -87,6 +89,17 @@ struct LoginView: View {
       .padding(.vertical, 6)
       .background(Divider(), alignment: .bottom)
       .padding(.bottom, 8)
+
+      HStack {
+          Spacer()
+          Button(action: {
+              isShowingForgotPassword = true
+          }) {
+              Text("Forgot Password?")
+                  .fontWeight(.semibold)
+                  .foregroundColor(.blue)
+          }
+      }
 
       if !viewModel.errorMessage.isEmpty {
         VStack {
@@ -140,7 +153,10 @@ struct LoginView: View {
     }
     .listStyle(.plain)
     .padding()
-//    .analyticsScreen(name: "\(Self.self)")
+    .sheet(isPresented: $isShowingForgotPassword) {
+        ForgotPasswordView()
+            .environmentObject(viewModel)
+    }
   }
 }
 

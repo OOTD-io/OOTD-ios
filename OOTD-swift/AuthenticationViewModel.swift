@@ -1,37 +1,7 @@
-//
-//  AuthenticationState.swift
-//  OOTD-swift
-//
-//  Created by Rahqi Sarsour on 6/10/25.
-//
-
-
-//
-// AuthenticationViewModel.swift
-// Favourites
-//
-// Created by Peter Friese on 08.07.2022
-// Copyright © 2022 Google LLC.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 import Foundation
-
-// For Sign in with Apple
 import AuthenticationServices
 import CryptoKit
 import Supabase
-//import .supabase
 
 enum AuthenticationState {
   case unauthenticated
@@ -46,6 +16,7 @@ enum AuthenticationFlow {
 
 @MainActor
 class AuthenticationViewModel: ObservableObject {
+  // MARK: - Published Properties
   @Published var email = ""
   @Published var password = ""
   @Published var confirmPassword = ""
@@ -58,11 +29,24 @@ class AuthenticationViewModel: ObservableObject {
   @Published var user: User?
   @Published var displayName = ""
 
+  // For Forgot Password Flow
+  @Published var isSendingPasswordReset = false
+  @Published var passwordResetEmailSent = false
+  @Published var passwordResetErrorMessage: String? = nil
+
+  // For Reset Password Flow
+  @Published var needsPasswordReset = false
+  @Published var isUpdatingPassword = false
+  @Published var passwordUpdateErrorMessage: String? = nil
+
+  private var authStateHandler: Any?
   private var currentNonce: String?
 
   init() {
-    registerAuthStateHandler()
-    verifySignInWithAppleAuthenticationState()
+    // Kick off the async state handler registration from the synchronous initializer
+    Task {
+        await self.registerAuthStateHandler()
+    }
 
     $flow
       .combineLatest($email, $password, $confirmPassword)
@@ -74,33 +58,26 @@ class AuthenticationViewModel: ObservableObject {
       .assign(to: &$isValid)
   }
 
-//  private var authStateHandler: AuthStateDidChangeListenerHandle?
+  // MARK: - Auth State
+  func registerAuthStateHandler() async {
+      if authStateHandler == nil {
+          authStateHandler = await supabase.auth.onAuthStateChange { [weak self] (event, session) in
+              guard let self = self else { return }
 
-  func registerAuthStateHandler() {
+              self.user = session?.user
+              self.authenticationState = session?.user == nil ? .unauthenticated : .authenticated
+              self.displayName = session?.user?.email ?? ""
 
-//    if authStateHandler == nil {
-//        try await supabase.auth.session { session in
-//            self.user = session.user
-//            self.authenticationState = session.user == nil ? .unauthenticated : .authenticated
-//            self.displayName = session.user?.displayName ?? user?.email ?? ""
-//      }
-//    }
+              if event == .passwordRecovery {
+                  self.needsPasswordReset = true
+              }
+          }
+      }
   }
 
   func switchFlow() {
     flow = flow == .login ? .signUp : .login
     errorMessage = ""
-  }
-
-  private func wait() async {
-    do {
-      print("Wait")
-      try await Task.sleep(nanoseconds: 1_000_000_000)
-      print("Done")
-    }
-    catch {
-      print(error.localizedDescription)
-    }
   }
 
   func reset() {
@@ -112,78 +89,82 @@ class AuthenticationViewModel: ObservableObject {
 }
 
 // MARK: - Email and Password Authentication
-
 extension AuthenticationViewModel {
-  func signInWithEmailPassword() async -> Bool {
-//      return true
-    authenticationState = .authenticating
-    do {
-      try await supabase.auth.signIn(email: self.email, password: self.password)
-        user = try await supabase.auth.user()
-        authenticationState = .authenticated
-      return true
-    }
-    catch  {
-      print(error)
-      errorMessage = error.localizedDescription
-      authenticationState = .unauthenticated
-      return false
-    }
-  }
+    func sendPasswordResetEmail() async {
+        isSendingPasswordReset = true
+        passwordResetErrorMessage = nil
+        passwordResetEmailSent = false
 
-  func signUpWithEmailPassword() async -> Bool {
-      authenticationState = .authenticating
-    Task {
-          do {
-              let response = try await supabase.auth.signUp(email: email, password: password)
-              if let session = response.session {
-                  authenticationState = .authenticated
-                  user = response.user
-                  print("Signup successful. Session: \(session)")
-                  return user != nil
-              } else {
-                  print("Signup succeeded but no session returned.")
-              }
-              return true
-          } catch {
-              print("Signup failed: \(error.localizedDescription)")
-              return false
-          }
-    }
-
-      return user != nil
-  }
-
-    func signOut() async -> Bool {
-        authenticationState = .unauthenticated
         do {
-            try await supabase.auth.signOut()
-            authenticationState = .unauthenticated
-          return true
+            try await supabase.auth.resetPasswordForEmail(email)
+            passwordResetEmailSent = true
+        }
+        catch {
+            passwordResetErrorMessage = error.localizedDescription
+        }
+
+        isSendingPasswordReset = false
+    }
+
+    func updateUserPassword(newPassword: String) async {
+        isUpdatingPassword = true
+        passwordUpdateErrorMessage = nil
+
+        do {
+            try await supabase.auth.update(user: UserAttributes(password: newPassword))
+            needsPasswordReset = false
+            await self.signOut()
+        }
+        catch {
+            passwordUpdateErrorMessage = error.localizedDescription
+        }
+
+        isUpdatingPassword = false
+    }
+
+    func signInWithEmailPassword() async -> Bool {
+        authenticationState = .authenticating
+        do {
+            try await supabase.auth.signIn(email: self.email, password: self.password)
+            return true
         }
         catch  {
-          print(error)
-          errorMessage = error.localizedDescription
-          authenticationState = .unauthenticated
-          return false
+            errorMessage = error.localizedDescription
+            authenticationState = .unauthenticated
+            return false
         }
-  }
+    }
 
-  func deleteAccount() async -> Bool {
-      return true
-//    do {
-//      try await user?.delete()
-//      return true
-//    }
-//    catch {
-//      errorMessage = error.localizedDescription
-//      return false
-//    }
-  }
+    func signUpWithEmailPassword() async -> Bool {
+        authenticationState = .authenticating
+        do {
+            try await supabase.auth.signUp(email: email, password: password)
+            return true
+        } catch {
+            errorMessage = error.localizedDescription
+            authenticationState = .unauthenticated
+            return false
+        }
+    }
+
+    func signOut() async -> Bool {
+        do {
+            try await supabase.auth.signOut()
+            return true
+        }
+        catch  {
+            errorMessage = error.localizedDescription
+            return false
+        }
+    }
+
+    func deleteAccount() async -> Bool {
+        // This is a placeholder, actual implementation would be needed.
+        return true
+    }
 }
 
-// MARK: Sign in with Apple
-
+// MARK: - Sign in with Apple
 extension AuthenticationViewModel {
 
   func handleSignInWithAppleRequest(_ request: ASAuthorizationAppleIDRequest) {
@@ -194,91 +175,33 @@ extension AuthenticationViewModel {
   }
 
   func handleSignInWithAppleCompletion(_ result: Result<ASAuthorization, Error>) {
-//    if case .failure(let failure) = result {
-//      errorMessage = failure.localizedDescription
-//    }
-//    else if case .success(let authorization) = result {
-//      if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
-//        guard let nonce = currentNonce else {
-//          fatalError("Invalid state: a login callback was received, but no login request was sent.")
-//        }
-//        guard let appleIDToken = appleIDCredential.identityToken else {
-//          print("Unable to fetdch identify token.")
-//          return
-//        }
-//        guard let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
-//          print("Unable to serialise token string from data: \(appleIDToken.debugDescription)")
-//          return
-//        }
-//
-//        let credential = OAuthProvider.credential(withProviderID: "apple.com",
-//                                                  idToken: idTokenString,
-//                                                  rawNonce: nonce)
-//        Task {
-//          do {
-//            let result = try await Auth.auth().signIn(with: credential)
-//            await updateDisplayName(for: result.user, with: appleIDCredential)
-//          }
-//          catch {
-//            print("Error authenticating: \(error.localizedDescription)")
-//          }
-//        }
-//      }
-//    }
-  }
+      if case .success(let authorization) = result {
+          if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
+              guard let nonce = currentNonce else {
+                fatalError("Invalid state: a login callback was received, but no login request was sent.")
+              }
+              guard let appleIDToken = appleIDCredential.identityToken else {
+                return
+              }
+              guard let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
+                return
+              }
 
-  func updateDisplayName(for user: User, with appleIDCredential: ASAuthorizationAppleIDCredential, force: Bool = false) async {
-//    if let currentDisplayName = Auth.auth().currentUser?.displayName, !currentDisplayName.isEmpty {
-//      // current user is non-empty, don't overwrite it
-//    }
-//    else {
-//      let changeRequest = user.createProfileChangeRequest()
-//      changeRequest.displayName = appleIDCredential.displayName()
-//      do {
-//        try await changeRequest.commitChanges()
-//        self.displayName = Auth.auth().currentUser?.displayName ?? ""
-//      }
-//      catch {
-//        print("Unable to update the user's displayname: \(error.localizedDescription)")
-//        errorMessage = error.localizedDescription
-//      }
-//    }
-  }
-
-  func verifySignInWithAppleAuthenticationState() {
-//    let appleIDProvider = ASAuthorizationAppleIDProvider()
-//    let providerData = Auth.auth().currentUser?.providerData
-//    if let appleProviderData = providerData?.first(where: { $0.providerID == "apple.com" }) {
-//      Task {
-//        do {
-//          let credentialState = try await appleIDProvider.credentialState(forUserID: appleProviderData.uid)
-//          switch credentialState {
-//          case .authorized:
-//            break // The Apple ID credential is valid.
-//          case .revoked, .notFound:
-//            // The Apple ID credential is either revoked or was not found, so show the sign-in UI.
-//            self.signOut()
-//          default:
-//            break
-//          }
-//        }
-//        catch {
-//        }
-//      }
-//    }
-  }
-
-}
-
-extension ASAuthorizationAppleIDCredential {
-  func displayName() -> String {
-    return [self.fullName?.givenName, self.fullName?.familyName]
-      .compactMap( {$0})
-      .joined(separator: " ")
+              Task {
+                  do {
+                      try await supabase.auth.signInWithIdToken(
+                        credentials: .init(provider: .apple, idToken: idTokenString, nonce: nonce)
+                      )
+                  } catch {
+                      self.errorMessage = error.localizedDescription
+                  }
+              }
+          }
+      }
   }
 }
 
-// Adapted from https://auth0.com/docs/api-auth/tutorials/nonce#generate-a-cryptographically-random-nonce
+// MARK: - Helpers
 private func randomNonceString(length: Int = 32) -> String {
   precondition(length > 0)
   let charset: [Character] =
@@ -291,9 +214,7 @@ private func randomNonceString(length: Int = 32) -> String {
       var random: UInt8 = 0
       let errorCode = SecRandomCopyBytes(kSecRandomDefault, 1, &random)
       if errorCode != errSecSuccess {
-        fatalError(
-          "Unable to generate nonce. SecRandomCopyBytes failed with OSStatus \(errorCode)"
-        )
+        fatalError("Unable to generate nonce. SecRandomCopyBytes failed with OSStatus \(errorCode)")
       }
       return random
     }

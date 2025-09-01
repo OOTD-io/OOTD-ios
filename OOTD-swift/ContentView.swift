@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var locationManager = LocationManager()
+    @EnvironmentObject var authViewModel: AuthenticationViewModel
 
     var body: some View {
         NavigationView {
@@ -25,6 +26,10 @@ struct ContentView: View {
         }
         .onAppear {
             locationManager.requestLocationPermission()
+        }
+        .sheet(isPresented: $authViewModel.needsPasswordReset) {
+            ResetPasswordView()
+                .environmentObject(authViewModel)
         }
     }
 }
