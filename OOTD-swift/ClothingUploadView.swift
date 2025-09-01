@@ -68,7 +68,9 @@ struct ClothingUploadView: View {
                 applyImage(capturedImage, to: activeCameraTarget)
             }
         }
-        .onChange(of: selectedPickerItem, perform: loadPickerImage)
+        .onChange(of: selectedPickerItem) { oldValue, newValue in
+            loadPickerImage(oldValue: oldValue, newValue: newValue)
+        }
     }
 
     // MARK: - Actions
