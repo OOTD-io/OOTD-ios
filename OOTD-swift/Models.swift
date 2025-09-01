@@ -43,15 +43,15 @@ struct ClothingItem: Codable, Identifiable {
     let type: String
     let subtype: String
     let color: String
-    let pattern: String
-    let material: String
+    let pattern: String?
+    let material: String?
     let brand: String?
     let size: String?
     let weather_suitability: WeatherSuitability
-    let occasion: [String]
-    let gender_presenting: String
+    let occasion: [String]?
+    let gender_presenting: String?
     let last_worn: String?
-    let image_confidence_score: Double
+    let image_confidence_score: Double?
     let images: ClothingImages
 }
 

@@ -12,8 +12,13 @@ class WeatherManager: ObservableObject {
     private let service = WeatherService()
     
     @Published var currentWeather: CurrentWeather?
+    @Published var errorMessage: String?
 
     func fetchWeather(for location: CLLocation) async {
+        DispatchQueue.main.async {
+            self.errorMessage = nil
+        }
+
         do {
             let weather = try await service.weather(for: location)
             DispatchQueue.main.async {
@@ -21,6 +26,9 @@ class WeatherManager: ObservableObject {
             }
         } catch {
             print("Weather error:", error.localizedDescription)
+            DispatchQueue.main.async {
+                self.errorMessage = "Failed to fetch weather data. Please check your connection and location settings."
+            }
         }
     }
 }

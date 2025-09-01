@@ -43,16 +43,25 @@ struct HomeView<Content>: View where Content: View{
                         if let weather = weatherManager.currentWeather {
                             WeatherCard(weather: weather)
                                 .padding(.vertical, 8)
+                        } else if let errorMessage = weatherManager.errorMessage {
+                            VStack {
+                                Text("Weather Error")
+                                    .font(.headline)
+                                    .foregroundColor(.red)
+                                Text(errorMessage)
+                                    .font(.caption)
+                                    .foregroundColor(.red)
+                            }
+                            .padding()
                         } else {
                             Text("Loading weather…")
                                 .foregroundColor(.gray)
-                                .onAppear {
-                                    if let loc = locationManager.location {
-                                        Task {
-                                            await weatherManager.fetchWeather(for: loc)
-                                        }
-                                    }
-                                }
+                        }
+                    }
+                    .onChange(of: locationManager.location) { oldValue, newValue in
+                        guard let location = newValue else { return }
+                        Task {
+                            await weatherManager.fetchWeather(for: location)
                         }
                         ClosetView(weatherManager: weatherManager)
                     }
