@@ -6,20 +6,20 @@ struct ClothingTile: View {
 
     var body: some View {
         VStack {
-            AsyncImage(url: URL(string: clothing.images.front)) { image in
-                image.resizable()
-                    .aspectRatio(contentMode: .fill)
-            } placeholder: {
-                Color.gray.opacity(0.1).overlay(ProgressView())
+            if let imageUrl = clothing.images?.front, let url = URL(string: imageUrl) {
+                AsyncImage(url: url) { image in
+                    image.resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    Color.gray.opacity(0.1).overlay(ProgressView())
+                }
+            } else {
+                Color.gray.opacity(0.1).overlay(Image(systemName: "photo.on.rectangle"))
             }
-            .frame(width: isLarge ? 140 : 100, height: isLarge ? 140 : 100)
-            .background(Color.gray.opacity(0.2))
-            .clipped()
-            .cornerRadius(12)
-
-            Text(clothing.subtype.capitalized)
-                .font(.caption)
-                .lineLimit(1)
         }
+        .frame(width: isLarge ? 140 : 100, height: isLarge ? 140 : 100)
+        .background(Color.gray.opacity(0.2))
+        .clipped()
+        .cornerRadius(12)
     }
 }
