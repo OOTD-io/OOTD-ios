@@ -121,7 +121,7 @@ extension AuthenticationViewModel {
         do {
             try await supabase.auth.update(user: UserAttributes(password: newPassword))
             needsPasswordReset = false
-            await self.signOut()
+            _ = await self.signOut()
         }
         catch {
             passwordUpdateErrorMessage = error.localizedDescription
