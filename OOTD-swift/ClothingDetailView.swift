@@ -34,14 +34,14 @@ struct ClothingDetailView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(clothing.type.capitalized)
                         .font(.largeTitle.bold())
-                    Text(clothing.subtype ?? "Unknown Subtype")
+                    Text(clothing.subtype)
                         .font(.title2)
                         .foregroundColor(.secondary)
 
                     HStack {
                         Text("Color:")
                             .fontWeight(.semibold)
-                        Text(clothing.color ?? "Unknown Color")
+                        Text(clothing.color)
                     }
 
                     if let brand = clothing.brand {
@@ -68,19 +68,5 @@ struct ClothingDetailView: View {
         .padding()
         .navigationTitle("Item Details")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
-                    dismiss()
-                }) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "chevron.left")
-                        Text("Back")
-                    }
-                    .foregroundColor(.primary)
-                }
-            }
-        }
     }
 }

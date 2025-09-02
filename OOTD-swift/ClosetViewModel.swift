@@ -1,4 +1,5 @@
 import Foundation
+import WeatherKit
 
 @MainActor
 class ClosetViewModel: ObservableObject {
@@ -9,46 +10,37 @@ class ClosetViewModel: ObservableObject {
 
     private let aiEngineService = AIEngineService.shared
 
-    func fetchData(weatherManager: WeatherManager) {
-        print("[ClosetViewModel] fetchData called.")
+    func fetchData(weather: CurrentWeather?) {
         isLoading = true
         errorMessage = nil
 
         Task {
-            // Fetch clothes first
+            // Fetch clothes first, as they are needed for generation
             do {
                 let response = try await aiEngineService.fetchClothing()
                 self.clothingItems = response.clothes
-                print("[ClosetViewModel] Successfully fetched \(response.clothes.count) clothing items.")
             } catch {
-                let errorDesc = "Failed to fetch closet items: \(error.localizedDescription)"
-                print("[ClosetViewModel] \(errorDesc)")
-                self.errorMessage = errorDesc
-                self.isLoading = false // Stop loading on error
+                self.errorMessage = "Failed to fetch closet items: \(error.localizedDescription)"
+                self.isLoading = false
                 return
             }
 
-            // Then, generate outfits
-            guard let weather = weatherManager.currentWeather else {
-                let errorDesc = "Weather data is not available to generate outfits."
-                print("[ClosetViewModel] \(errorDesc)")
-                self.errorMessage = errorDesc
-                self.isLoading = false // Stop loading
+            // Then, generate outfits if we have weather
+            guard let weather = weather else {
+                // This is not an error, we just can't generate outfits without weather.
+                // The UI should handle showing a message to the user.
+                self.isLoading = false
                 return
             }
 
             let temp = weather.temperature.value
             let condition = weather.condition.description.lowercased()
-            print("[ClosetViewModel] Generating outfits with temp: \(temp), condition: \(condition)")
 
             do {
                 let response = try await aiEngineService.generateOutfits(temperature: temp, condition: condition)
                 self.generatedOutfits = response.outfits
-                print("[ClosetViewModel] Successfully generated \(response.outfits.count) outfits.")
             } catch {
-                let errorDesc = "Failed to generate outfits: \(error.localizedDescription)"
-                print("[ClosetViewModel] \(errorDesc)")
-                self.errorMessage = errorDesc
+                self.errorMessage = "Failed to generate outfits: \(error.localizedDescription)"
             }
 
             self.isLoading = false

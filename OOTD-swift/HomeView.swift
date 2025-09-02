@@ -2,7 +2,7 @@ import SwiftUI
 import AuthenticationServices
 
 struct HomeView<Content>: View where Content: View {
-    @StateObject private var viewModel = AuthenticationViewModel()
+    @EnvironmentObject var authViewModel: AuthenticationViewModel
     @StateObject private var locationManager = LocationManager()
     @StateObject private var weatherManager = WeatherManager()
     @StateObject private var closetViewModel = ClosetViewModel()
@@ -26,19 +26,24 @@ struct HomeView<Content>: View where Content: View {
             tabBar
         }
         .onAppear {
-            // Initial data fetch when the view first appears
-            closetViewModel.fetchData(weatherManager: weatherManager)
-        }
-        .onChange(of: selectedTab) { oldTab, newTab in
-            // Fetch data only when switching back to the closet tab
-            if newTab == .closet && oldTab != .closet {
-                closetViewModel.fetchData(weatherManager: weatherManager)
-            }
+            locationManager.requestLocationPermission()
         }
         .onChange(of: locationManager.location) { oldValue, newValue in
             guard let location = newValue else { return }
             Task {
                 await weatherManager.fetchWeather(for: location)
+            }
+        }
+        .onChange(of: weatherManager.currentWeather) { oldValue, newValue in
+            // Once we have weather, fetch data for the closet
+            if newValue != nil {
+                closetViewModel.fetchData(weather: newValue)
+            }
+        }
+        .onChange(of: selectedTab) { oldTab, newTab in
+             // If we switch back to the closet and have weather, refresh data
+            if newTab == .closet, let weather = weatherManager.currentWeather {
+                closetViewModel.fetchData(weather: weather)
             }
         }
     }
@@ -47,28 +52,11 @@ struct HomeView<Content>: View where Content: View {
     private var currentTabView: some View {
         switch selectedTab {
         case .closet:
-            VStack {
-                if let weather = weatherManager.currentWeather {
-                    WeatherCard(weather: weather)
-                        .padding(.vertical, 8)
-                } else if let errorMessage = weatherManager.errorMessage {
-                    VStack {
-                        Text("Weather Error").font(.headline).foregroundColor(.red)
-                        Text(errorMessage).font(.caption).foregroundColor(.red)
-                    }
-                    .padding()
-                } else {
-                    Text("Loading weather…").foregroundColor(.gray)
-                }
-                ClosetView(viewModel: closetViewModel, weatherManager: weatherManager)
-            }
+            ClosetView(viewModel: closetViewModel, weatherManager: weatherManager)
         case .add:
             ClothingUploadView()
         case .profile:
-            NavigationView {
-              UserProfileView()
-                .environmentObject(viewModel)
-            }
+            UserProfileView()
         }
     }
 
@@ -82,15 +70,16 @@ struct HomeView<Content>: View where Content: View {
             tabBarButton(tab: .profile, systemImage: "person.crop.circle", text: "Profile")
             Spacer()
         }
-        .padding(.vertical, 10)
+        .padding(.top, 10)
         .background(Color.white.ignoresSafeArea(edges: .bottom))
         .shadow(color: .gray.opacity(0.2), radius: 5, y: -2)
     }
 
     private func tabBarButton(tab: Tab, systemImage: String, text: String) -> some View {
         Button(action: { selectedTab = tab }) {
-            VStack {
+            VStack(spacing: 4) {
                 Image(systemName: systemImage)
+                    .font(.title2)
                 Text(text).font(.caption2)
             }
         }
@@ -109,11 +98,6 @@ struct HomeView<Content>: View where Content: View {
                     .font(.system(size: 24, weight: .bold))
             }
         }
-    }
-}
-
-#Preview {
-    HomeView {
-        Text("Content")
+        .offset(y: -15)
     }
 }

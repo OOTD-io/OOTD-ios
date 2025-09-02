@@ -3,7 +3,6 @@ import SwiftUI
 struct ClothingListView: View {
     let title: String
     let items: [ClothingItem]
-    @Environment(\.dismiss) var dismiss
 
     private let columns = [
         GridItem(.adaptive(minimum: 150), spacing: 16)
@@ -35,19 +34,5 @@ struct ClothingListView: View {
             .padding()
         }
         .navigationTitle(title)
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
-                    dismiss()
-                }) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "chevron.left")
-                        Text("Back")
-                    }
-                    .foregroundColor(.primary)
-                }
-            }
-        }
     }
 }

@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  OOTD-swift
-//
-//  Created by Rahqi Sarsour on 5/26/25.
-//
-
 import SwiftUI
 
 struct ContentView: View {
@@ -12,17 +5,15 @@ struct ContentView: View {
     @EnvironmentObject var authViewModel: AuthenticationViewModel
 
     var body: some View {
-        NavigationView {
-            AuthenticatedView {
-                Image("ootd-icon")
-                .resizable()
-                .frame(width: 300 , height: 300)
-                Text("Welcome to OOTD!")
-                .font(.title)
-                Text("You need to be logged in to use this app.")
-            } content: {
-                Spacer()
+        AuthenticatedView {
+            AuthenticationView()
+        } content: {
+            HomeView {
+                // This content is not used in the current HomeView implementation
+                // but is here to satisfy the generic constraint.
+                EmptyView()
             }
+            .environmentObject(authViewModel)
         }
         .onAppear {
             locationManager.requestLocationPermission()
@@ -36,4 +27,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environmentObject(AuthenticationViewModel())
 }

@@ -4,68 +4,85 @@ struct ClosetView: View {
     @ObservedObject var viewModel: ClosetViewModel
     @ObservedObject var weatherManager: WeatherManager
 
-    // Group clothing items by category for display
     private var clothingByCategory: [String: [ClothingItem]] {
         Dictionary(grouping: viewModel.clothingItems, by: { $0.type })
     }
 
-    // Define a consistent order for categories
     private let categoryOrder: [String] = ["shirt", "pants", "shoes", "dress", "outerwear", "accessory"]
 
     var body: some View {
-        VStack {
-            if viewModel.isLoading {
-                ProgressView("Loading Your Closet...")
-                    .padding()
-            } else if let errorMessage = viewModel.errorMessage {
-                VStack {
-                    Text("Error")
-                        .font(.headline)
-                        .foregroundColor(.red)
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .padding()
-                    Button("Retry") {
-                        viewModel.fetchData(weatherManager: weatherManager)
-                    }
-                }
-            } else {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 24) {
-                        // Suggested Outfits Section
-                        VStack(alignment: .leading) {
-                            Text("Suggested Outfits")
-                                .font(.title.bold())
-                                .padding(.horizontal)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
 
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 16) {
-                                    if viewModel.generatedOutfits.isEmpty {
-                                        Text("No outfits to suggest right now.")
-                                            .foregroundColor(.secondary)
-                                            .padding()
-                                            .frame(height: 100)
-                                    } else {
-                                        ForEach(viewModel.generatedOutfits) { outfit in
-                                            OutfitTileView(outfit: outfit)
-                                        }
+                // Weather Card
+                if let weather = weatherManager.currentWeather {
+                    WeatherCard(weather: weather)
+                        .padding(.horizontal)
+                } else if let errorMessage = weatherManager.errorMessage {
+                    VStack {
+                        Text("Weather Error").font(.headline).foregroundColor(.red)
+                        Text(errorMessage).font(.caption).foregroundColor(.red)
+                    }
+                    .padding()
+                } else {
+                    HStack {
+                        Spacer()
+                        ProgressView("Loading Weather...")
+                        Spacer()
+                    }
+                    .padding()
+                }
+
+                // Main Content
+                if viewModel.isLoading {
+                    HStack {
+                        Spacer()
+                        ProgressView("Loading Your Closet...")
+                        Spacer()
+                    }
+                    .padding()
+                } else if let errorMessage = viewModel.errorMessage {
+                    VStack {
+                        Text("Error").font(.headline).foregroundColor(.red)
+                        Text(errorMessage).font(.caption).foregroundColor(.red)
+                    }
+                    .padding()
+                } else {
+                    // Suggested Outfits Section
+                    VStack(alignment: .leading) {
+                        Text("Suggested Outfits")
+                            .font(.title.bold())
+                            .padding(.horizontal)
+
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 16) {
+                                if viewModel.generatedOutfits.isEmpty {
+                                    Text("No outfits to suggest right now.")
+                                        .foregroundColor(.secondary)
+                                        .padding()
+                                        .frame(height: 100)
+                                } else {
+                                    ForEach(viewModel.generatedOutfits) { outfit in
+                                        OutfitTileView(outfit: outfit)
                                     }
                                 }
-                                .padding(.horizontal)
                             }
-                        }
-
-                        // Clothing Categories Section
-                        ForEach(categoryOrder, id: \.self) { category in
-                            if let items = clothingByCategory[category], !items.isEmpty {
-                                ClothingCategoryRow(title: category.capitalized, items: items)
-                            }
+                            .padding(.horizontal)
                         }
                     }
-                    .padding(.vertical)
+
+                    // Clothing Categories Section
+                    ForEach(categoryOrder, id: \.self) { category in
+                        if let items = clothingByCategory[category], !items.isEmpty {
+                            ClothingCategoryRow(title: category.capitalized, items: items)
+                        }
+                    }
                 }
             }
+            .padding(.vertical)
         }
+        .navigationTitle("Closet")
+        .navigationBarHidden(true)
     }
 }
 
@@ -75,7 +92,7 @@ struct OutfitTileView: View {
 
     var body: some View {
         VStack {
-            AsyncImage(url: URL(string: outfit.image_url)) { image in
+            AsyncImage(url: URL(string: outfit.imageUrl)) { image in
                 image.resizable().aspectRatio(contentMode: .fill)
             } placeholder: {
                 Color.gray.opacity(0.1).overlay(ProgressView())
@@ -104,10 +121,9 @@ struct ClothingCategoryRow: View {
                 Text(title)
                     .font(.title2.bold())
                 Spacer()
-                // NavigationLink("See All →") {
-                //     // The destination view needs to be updated to accept the new ClothingItem model
-                //     // ClothingListView(title: title, items: items)
-                // }
+                NavigationLink("See All →") {
+                     ClothingListView(title: title, items: items)
+                }
             }
             .padding(.horizontal)
 
@@ -134,19 +150,5 @@ struct ClothingCategoryRow: View {
                 .padding(.horizontal)
             }
         }
-    }
-}
-
-// A dummy WeatherManager for previews
-class PreviewWeatherManager: WeatherManager {
-    override init() {
-        super.init()
-    }
-}
-
-#Preview {
-    NavigationView {
-        ClosetView(viewModel: ClosetViewModel(), weatherManager: PreviewWeatherManager())
-            .environmentObject(AuthenticationViewModel())
     }
 }

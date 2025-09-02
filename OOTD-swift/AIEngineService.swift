@@ -4,7 +4,18 @@ class AIEngineService {
     static let shared = AIEngineService()
     private let baseURL = URL(string: "https://ootd-ai-engine-785972969271.us-central1.run.app/api")!
 
-    private init() {}
+    private let jsonDecoder: JSONDecoder
+    private let jsonEncoder: JSONEncoder
+
+    private init() {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        self.jsonDecoder = decoder
+
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+        self.jsonEncoder = encoder
+    }
 
     // MARK: - Private Helpers
     private func getHeaders() async -> [String: String] {
@@ -19,44 +30,25 @@ class AIEngineService {
     }
 
     private func performRequest<T: Decodable>(request: URLRequest) async throws -> T {
-        print("[AIEngineService] Performing request to: \(request.url?.absoluteString ?? "N/A")")
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
-            print("[AIEngineService] Error: Did not receive a valid HTTP response.")
             throw URLError(.badServerResponse)
         }
 
-        print("[AIEngineService] Received HTTP status code: \(httpResponse.statusCode)")
-
         guard (200...299).contains(httpResponse.statusCode) else {
-            let errorBody = String(data: data, encoding: .utf8) ?? "No response body"
-            print("[AIEngineService] Error: Server returned status \(httpResponse.statusCode). Body: \(errorBody)")
-            // Try to decode an error message from the body
-            if let errorDetail = try? JSONDecoder().decode(APIErrorDetail.self, from: data) {
-                throw APIError.serverError(message: errorDetail.detail)
+            if let errorDetail = try? jsonDecoder.decode(APIErrorDetail.self, from: data) {
+                throw APIError.serverError(message: "Error \(httpResponse.statusCode): \(errorDetail.detail)")
             }
             throw URLError(URLError.Code(rawValue: httpResponse.statusCode))
         }
 
-        print("[AIEngineService] Request successful. Attempting to decode response.")
-        return try JSONDecoder().decode(T.self, from: data)
-    }
-
-    struct APIErrorDetail: Decodable {
-        let detail: String
-    }
-
-    enum APIError: Error, LocalizedError {
-        case serverError(message: String)
-
-        var errorDescription: String? {
-            switch self {
-            case .serverError(let message):
-                return message
-            }
+        do {
+            return try jsonDecoder.decode(T.self, from: data)
+        } catch {
+            print("AIEngineService Decoding Error: \(error)")
+            throw error
         }
     }
-
 
     // MARK: - API Functions
 
@@ -67,11 +59,11 @@ class AIEngineService {
         request.allHTTPHeaderFields = await getHeaders()
 
         let requestBody = SaveClothingRequest(
-            front_image: frontImage.base64EncodedString(),
-            back_image: backImage?.base64EncodedString(),
-            tag_image: tagImage?.base64EncodedString()
+            frontImage: frontImage.base64EncodedString(),
+            backImage: backImage?.base64EncodedString(),
+            tagImage: tagImage?.base64EncodedString()
         )
-        request.httpBody = try JSONEncoder().encode(requestBody)
+        request.httpBody = try jsonEncoder.encode(requestBody)
 
         return try await performRequest(request: request)
     }
@@ -93,7 +85,7 @@ class AIEngineService {
 
         let weatherInput = WeatherInput(temperature: temperature, condition: condition)
         let requestBody = GenerateOutfitRequest(weather: weatherInput)
-        request.httpBody = try JSONEncoder().encode(requestBody)
+        request.httpBody = try jsonEncoder.encode(requestBody)
 
         return try await performRequest(request: request)
     }

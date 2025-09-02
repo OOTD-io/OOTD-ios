@@ -1,10 +1,3 @@
-//
-//  OOTD_swiftApp.swift
-//  OOTD-swift
-//
-//  Created by Rahqi Sarsour on 5/26/25.
-//
-
 import SwiftUI
 
 @main

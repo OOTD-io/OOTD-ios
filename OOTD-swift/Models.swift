@@ -1,18 +1,32 @@
 import Foundation
 
-// This file contains the data models (structs) used to communicate
-// with the OOTD AI Engine API. They are based on the provided API documentation.
+// MARK: - General API Structures
+
+struct APIErrorDetail: Decodable {
+    let detail: String
+}
+
+enum APIError: Error, LocalizedError {
+    case serverError(message: String)
+
+    var errorDescription: String? {
+        switch self {
+        case .serverError(let message):
+            return message
+        }
+    }
+}
 
 // MARK: - Endpoint 1: Save Clothing Item
 
 struct SaveClothingRequest: Codable {
-    let front_image: String
-    let back_image: String?
-    let tag_image: String?
+    let frontImage: String
+    let backImage: String?
+    let tagImage: String?
 }
 
 struct SaveClothingResponse: Codable {
-    let item_id: String
+    let itemId: String
     let message: String
     let analysis: ClothingAnalysis
 }
@@ -25,40 +39,41 @@ struct ClothingAnalysis: Codable {
     let material: String
     let brand: String?
     let size: String?
-    let weather_suitability: WeatherSuitability
+    let weatherSuitability: WeatherSuitability
     let occasion: [String]
-    let gender_presenting: String
-    let image_confidence_score: Double
+    let genderPresenting: String
+    let imageConfidenceScore: Double
 }
 
 // MARK: - Endpoint 2: Get User's Clothing Items
 
 struct GetClothesResponse: Codable {
     let clothes: [ClothingItem]
-    let total_count: Int
-    let user_id: String
+    let totalCount: Int
+    let userId: String
 }
 
 struct ClothingItem: Codable, Identifiable {
     let id: String
     let type: String
-    let subtype: String?
-    let color: String?
-    let pattern: String?
-    let material: String?
+    let subtype: String
+    let color: String
+    let pattern: String
+    let material: String
     let brand: String?
     let size: String?
-    let weather_suitability: WeatherSuitability?
-    let occasion: [String]?
-    let gender_presenting: String?
-    let last_worn: String?
-    let image_confidence_score: Double?
-    let images: ClothingImages?
+    let weatherSuitability: WeatherSuitability
+    let occasion: [String]
+    let genderPresenting: String
+    let lastWorn: String?
+    let imageConfidenceScore: Double
+    let images: ClothingImages
 }
 
 struct ClothingImages: Codable {
     let front: String
     let back: String?
+    let tag: String?
 }
 
 struct WeatherSuitability: Codable {
@@ -80,15 +95,21 @@ struct WeatherInput: Codable {
 }
 
 struct GenerateOutfitResponse: Codable {
-    let user_id: String
-    let total_outfits_generated: Int
+    let userId: String
+    let totalOutfitsGenerated: Int
     let outfits: [Outfit]
 }
 
 struct Outfit: Codable, Identifiable {
-    var id: String { clothing_item_ids.joined(separator: "-") }
+    // The API doesn't provide a stable ID, so we generate one for SwiftUI's purposes.
+    let id = UUID()
     let category: String
-    let clothing_item_ids: [String]
-    let image_url: String
-    let individual_item_images: [String]
+    let clothingItemIds: [String]
+    let imageUrl: String
+    let imagePath: String
+    let individualItemImages: [String]
+
+    private enum CodingKeys: String, CodingKey {
+        case category, clothingItemIds, imageUrl, imagePath, individualItemImages
+    }
 }
