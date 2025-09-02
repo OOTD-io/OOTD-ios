@@ -53,7 +53,7 @@ struct ClothingItem: Codable, Identifiable {
     let gender_presenting: String?
     let last_worn: String?
     let image_confidence_score: Double?
-    let images: ClothingImages
+    let images: ClothingImages?
 }
 
 struct ClothingImages: Codable {

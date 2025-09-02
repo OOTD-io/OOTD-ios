@@ -8,15 +8,27 @@ struct ClothingDetailView: View {
         ScrollView {
             VStack(spacing: 20) {
                 // Display the front image from the URL
-                AsyncImage(url: URL(string: clothing.images.front)) { image in
-                    image.resizable()
-                        .aspectRatio(contentMode: .fit)
-                } placeholder: {
-                    ProgressView()
+                if let imageUrl = clothing.images?.front, let url = URL(string: imageUrl) {
+                    AsyncImage(url: url) { image in
+                        image.resizable()
+                            .aspectRatio(contentMode: .fit)
+                    } placeholder: {
+                        ProgressView()
+                    }
+                    .frame(height: 300)
+                    .cornerRadius(12)
+                    .padding(.top)
+                } else {
+                    // Placeholder for items with no image
+                    Image(systemName: "photo.on.rectangle.angled")
+                        .font(.largeTitle)
+                        .foregroundColor(.secondary)
+                        .frame(height: 300)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.gray.opacity(0.1))
+                        .cornerRadius(12)
+                        .padding(.top)
                 }
-                .frame(height: 300)
-                .cornerRadius(12)
-                .padding(.top)
                 
                 // Display clothing details from the new model
                 VStack(alignment: .leading, spacing: 8) {

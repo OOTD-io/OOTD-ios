@@ -115,14 +115,20 @@ struct ClothingCategoryRow: View {
                 HStack(spacing: 15) {
                     ForEach(items) { item in
                         NavigationLink(destination: ClothingDetailView(clothing: item)) {
-                            AsyncImage(url: URL(string: item.images.front)) { image in
-                                image.resizable().aspectRatio(contentMode: .fill)
-                            } placeholder: {
-                                Color.gray.opacity(0.1).overlay(ProgressView())
+                            if let imageUrl = item.images?.front, let url = URL(string: imageUrl) {
+                                AsyncImage(url: url) { image in
+                                    image.resizable().aspectRatio(contentMode: .fill)
+                                } placeholder: {
+                                    Color.gray.opacity(0.1).overlay(ProgressView())
+                                }
+                            } else {
+                                Color.gray.opacity(0.1).overlay(Image(systemName: "photo.on.rectangle"))
                             }
-                            .frame(width: 110, height: 110)
-                            .cornerRadius(8)
                         }
+                        .frame(width: 110, height: 110)
+                        .background(Color.gray.opacity(0.1))
+                        .cornerRadius(8)
+                        .clipped()
                     }
                 }
                 .padding(.horizontal)
