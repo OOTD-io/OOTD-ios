@@ -48,7 +48,7 @@ struct ClothingItem: Codable, Identifiable {
     let material: String?
     let brand: String?
     let size: String?
-    let weather_suitability: WeatherSuitability
+    let weather_suitability: WeatherSuitability?
     let occasion: [String]?
     let gender_presenting: String?
     let last_worn: String?
