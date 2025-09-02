@@ -42,8 +42,8 @@ struct GetClothesResponse: Codable {
 struct ClothingItem: Codable, Identifiable {
     let id: String
     let type: String
-    let subtype: String
-    let color: String
+    let subtype: String?
+    let color: String?
     let pattern: String?
     let material: String?
     let brand: String?
