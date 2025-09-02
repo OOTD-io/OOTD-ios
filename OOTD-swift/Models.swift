@@ -28,6 +28,7 @@ struct ClothingAnalysis: Codable {
     let weather_suitability: WeatherSuitability
     let occasion: [String]
     let gender_presenting: String
+    let image_confidence_score: Double
 }
 
 // MARK: - Endpoint 2: Get User's Clothing Items

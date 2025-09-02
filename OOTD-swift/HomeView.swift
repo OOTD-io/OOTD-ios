@@ -16,6 +16,7 @@ struct HomeView<Content>: View where Content: View{
     @State private var presentingProfileScreen = false
     @StateObject private var locationManager = LocationManager()
     @StateObject private var weatherManager = WeatherManager()
+    @StateObject private var closetViewModel = ClosetViewModel()
     
     @ViewBuilder var content: () -> Content
     
@@ -63,7 +64,12 @@ struct HomeView<Content>: View where Content: View{
                         Task {
                             await weatherManager.fetchWeather(for: location)
                         }
-                        ClosetView(weatherManager: weatherManager)
+                        ClosetView(weatherManager: weatherManager, viewModel: closetViewModel)
+                    }
+                    .onChange(of: selectedTab) { oldTab, newTab in
+                        if newTab == .closet {
+                            closetViewModel.fetchData(weatherManager: weatherManager)
+                        }
                     }
                     
                 case .add:

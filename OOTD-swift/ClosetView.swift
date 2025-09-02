@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ClosetView: View {
-    @StateObject private var viewModel = ClosetViewModel()
+    @ObservedObject var viewModel: ClosetViewModel
     @ObservedObject var weatherManager: WeatherManager
 
     // Group clothing items by category for display
@@ -65,10 +65,6 @@ struct ClosetView: View {
                     .padding(.vertical)
                 }
             }
-        }
-        .onAppear {
-            print("[ClosetView] .onAppear called. Fetching data.")
-            viewModel.fetchData(weatherManager: weatherManager)
         }
     }
 }
@@ -144,7 +140,7 @@ class PreviewWeatherManager: WeatherManager {
 
 #Preview {
     NavigationView {
-        ClosetView(weatherManager: PreviewWeatherManager())
+        ClosetView(viewModel: ClosetViewModel(), weatherManager: PreviewWeatherManager())
             .environmentObject(AuthenticationViewModel())
     }
 }
