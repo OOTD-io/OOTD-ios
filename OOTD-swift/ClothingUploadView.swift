@@ -12,6 +12,7 @@ struct ClothingUploadView: View {
     @State private var activeCameraTarget: String?
 
     // For the photo picker
+    @State private var showingPicker = false
     @State private var selectedPickerItem: PhotosPickerItem?
 
     var body: some View {
