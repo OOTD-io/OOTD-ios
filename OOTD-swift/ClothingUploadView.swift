@@ -32,7 +32,7 @@ struct ClothingUploadView: View {
             }
 
             if viewModel.isSuccess {
-                Text("Upload successful!")
+                Text("Upload successful! The AI is analyzing your item.")
                     .foregroundColor(.green)
                     .padding()
             }

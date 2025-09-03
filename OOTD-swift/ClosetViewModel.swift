@@ -27,8 +27,6 @@ class ClosetViewModel: ObservableObject {
 
             // Then, generate outfits if we have weather
             guard let weather = weather else {
-                // This is not an error, we just can't generate outfits without weather.
-                // The UI should handle showing a message to the user.
                 self.isLoading = false
                 return
             }

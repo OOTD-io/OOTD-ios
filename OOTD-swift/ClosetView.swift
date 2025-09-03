@@ -8,6 +8,7 @@ struct ClosetView: View {
         Dictionary(grouping: viewModel.clothingItems, by: { $0.type })
     }
 
+    // Define a consistent order for categories
     private let categoryOrder: [String] = ["shirt", "pants", "shoes", "dress", "outerwear", "accessory"]
 
     var body: some View {

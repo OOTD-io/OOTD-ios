@@ -34,14 +34,14 @@ struct ClothingDetailView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(clothing.type.capitalized)
                         .font(.largeTitle.bold())
-                    Text(clothing.subtype ?? "Unknown Subtype")
+                    Text(clothing.subtype)
                         .font(.title2)
                         .foregroundColor(.secondary)
 
                     HStack {
                         Text("Color:")
                             .fontWeight(.semibold)
-                        Text(clothing.color ?? "Unknown Color")
+                        Text(clothing.color)
                     }
 
                     if let brand = clothing.brand {
