@@ -7,7 +7,7 @@ struct ClothingDetailView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                // Display the front image from the URL
+                // Display the front image from the URL, handling optionals safely
                 if let imageUrl = clothing.images?.front, let url = URL(string: imageUrl) {
                     AsyncImage(url: url) { image in
                         image.resizable()
@@ -30,7 +30,7 @@ struct ClothingDetailView: View {
                         .padding(.top)
                 }
                 
-                // Display clothing details from the new model
+                // Display clothing details from the new model, handling optionals safely
                 VStack(alignment: .leading, spacing: 8) {
                     Text(clothing.type.capitalized)
                         .font(.largeTitle.bold())
