@@ -10,18 +10,13 @@ import SwiftUI
 struct ClothingListView: View {
     let title: String
     let items: [ClothingItem]
-    @State private var selectedItem: ClothingItem? = nil
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 20)], spacing: 20) {
-                ForEach(0..<20) { _ in
-                    ClothingNavigationTile(clothing: items[0], isLarge: false)
-//                    ClothingTile(item: items[0], isLarge: true)
-//                        .onTapGesture {
-//                            selectedItem = items[0]
-//                        }
+                ForEach(items) { item in
+                    ClothingNavigationTile(clothing: item, isLarge: true)
                 }
             }
             .padding()
@@ -31,7 +26,6 @@ struct ClothingListView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
-                    // Handle dismiss (via pop)
                     dismiss()
                 }) {
                     HStack(spacing: 4) {
@@ -40,18 +34,11 @@ struct ClothingListView: View {
                         Text("Back")
                             .font(.system(size: 16, weight: .medium))
                     }
-                    .foregroundColor(Color.primary) // Or your custom color
+                    .foregroundColor(Color.primary)
                     .padding(.vertical, 8)
                     .padding(.horizontal, 12)
-//                    .background(
-//                        RoundedRectangle(cornerRadius: 10)
-//                            .fill(Color(UIColor.systemGray5))
-//                    )
                 }
             }
         }
-//        .sheet(item: $selectedItem) {
-//            ClothingDetailView(item: $0)
-//        }
     }
 }

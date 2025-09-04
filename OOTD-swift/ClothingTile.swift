@@ -13,33 +13,29 @@ struct ClothingTile: View {
 
     var body: some View {
         VStack {
-            if let sceneName = item.sceneImage {
-                SceneKitView(modelName: sceneName)
-                    .frame(width: isLarge ? 140 : 100, height: isLarge ? 140 : 100)
-                    .clipShape(.buttonBorder)
-                //                .frame(height: 300)
-                //                .cornerRadius(12)
-                //                .padding()
-                //                .background(.clear)
-            } else {
-                item.image
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: isLarge ? 140 : 100, height: isLarge ? 140 : 100)
-                    .background(Color.gray.opacity(0.2))
-                    .clipped()
-                    .cornerRadius(12)
-
+            AsyncImage(url: URL(string: item.images.front)) { phase in
+                switch phase {
+                case .empty:
+                    ProgressView()
+                case .success(let image):
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                case .failure:
+                    Image(systemName: "photo")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .foregroundColor(.gray)
+                @unknown default:
+                    EmptyView()
+                }
             }
-//            item.image
-//                .resizable()
-//                .aspectRatio(contentMode: .fit)
-//                .frame(width: isLarge ? 140 : 100, height: isLarge ? 140 : 100)
-//                .background(Color.gray.opacity(0.2))
-//                .clipped()
-//                .cornerRadius(12)
+            .frame(width: isLarge ? 140 : 100, height: isLarge ? 140 : 100)
+            .background(Color.gray.opacity(0.2))
+            .clipped()
+            .cornerRadius(12)
 
-            Text(item.name)
+            Text(item.subtype)
                 .font(.caption)
                 .lineLimit(1)
         }
