@@ -186,7 +186,7 @@ extension AuthenticationViewModel {
         print("Sending password reset for \(email)")
         try await supabase.auth.resetPasswordForEmail(
             email,
-            redirectTo: URL(string: "com.ootd.dev://reset-password")!
+            redirectTo: URL(string: "ootd://auth-callback")!
         )
     } catch {
         print("Error sending password reset: \(error.localizedDescription)")
