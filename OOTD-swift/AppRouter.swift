@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+extension Notification.Name {
+    static let didReceivePasswordRecoveryURL = Notification.Name("didReceivePasswordRecoveryURL")
+}
+
 class AppRouter: ObservableObject {
     @Published var showResetPasswordView = false
 }
