@@ -20,19 +20,30 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                      open url: URL,
                      options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
 
-        // Use the official Supabase helper function to identify a sign-in link.
-        // This is more reliable than manually parsing the URL fragment.
-        if supabase.auth.isSignInWithEmailLink(url.absoluteString) {
-            // Post a notification to the SwiftUI App lifecycle to trigger navigation.
-            NotificationCenter.default.post(name: .didReceivePasswordRecoveryURL, object: nil)
+        print("DEBUG: AppDelegate received URL: \(url.absoluteString)")
 
-            // Task to process the session from the URL, which authenticates the user.
-            Task {
-                do {
-                    _ = try await supabase.auth.session(from: url)
-                } catch {
-                    print("Error processing Supabase session from URL in AppDelegate: \(error.localizedDescription)")
-                }
+        // Ensure we are only handling our app's specific auth URLs
+        guard url.scheme == "ootd" && url.host == "auth-callback" else {
+            print("DEBUG: URL is not for this app. Ignoring.")
+            return false
+        }
+
+        // Check if it's a password recovery link by looking at the fragment
+        let components = URLComponents(url: url, resolvingAgainstBaseURL: true)
+        if let fragment = components?.fragment, fragment.contains("type=recovery") {
+            print("DEBUG: URL is a password recovery link. Posting notification.")
+            NotificationCenter.default.post(name: .didReceivePasswordRecoveryURL, object: nil)
+        } else {
+            print("DEBUG: URL is for auth callback, but not for password recovery.")
+        }
+
+        // Always try to process the session from the URL in a background task
+        Task {
+            do {
+                _ = try await supabase.auth.session(from: url)
+                print("DEBUG: Supabase session successfully processed from URL.")
+            } catch {
+                print("DEBUG: Error processing Supabase session from URL in AppDelegate: \(error.localizedDescription)")
             }
         }
 
