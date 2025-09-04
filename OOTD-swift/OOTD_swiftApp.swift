@@ -29,8 +29,15 @@ struct OOTD_swiftApp: App {
             }
             .preferredColorScheme(.light)
             .onReceive(NotificationCenter.default.publisher(for: .didReceivePasswordRecoveryURL)) { _ in
-                // When we receive the notification from the AppDelegate, trigger the navigation
-                appRouter.showResetPasswordView = true
+                // Introduce a small delay to allow the app's view hierarchy to settle
+                // before we try to programmatically navigate. This helps avoid race conditions on launch.
+                Task {
+                    // Wait for 0.1 seconds
+                    try? await Task.sleep(nanoseconds: 100_000_000)
+                    await MainActor.run {
+                        appRouter.showResetPasswordView = true
+                    }
+                }
             }
         }
     }
