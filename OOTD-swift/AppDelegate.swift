@@ -14,9 +14,6 @@ extension Notification.Name {
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-
-        let user = supabase.auth.currentUser
-
         return true
     }
 
@@ -24,35 +21,32 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                      open url: URL,
                      options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
 
-        print("DEBUG: AppDelegate received URL: \(url.absoluteString)")
+        print("AppDelegate received URL: \(url.absoluteString)")
 
-        guard url.scheme == "ootd" && url.host == "auth-callback" else {
-            print("DEBUG: URL is not for this app. Ignoring.")
-            return false
-        }
+        guard url.scheme == "ootd", url.host == "auth-callback" else { return false }
 
+        // If it's a recovery link, persist it as a fallback
         let components = URLComponents(url: url, resolvingAgainstBaseURL: true)
+        let isRecovery = components?.queryItems?.contains(where: { $0.name == "type" && $0.value == "recovery" }) ?? false
 
-        // Robustly check for recovery type in EITHER query params OR the fragment.
-        let isRecoveryInQuery = components?.queryItems?.contains(where: { $0.name == "type" && $0.value == "recovery" }) ?? false
-        let isRecoveryInFragment = components?.fragment?.contains("type=recovery") ?? false
+        if isRecovery {
+            print("AppDelegate detected recovery link. Persisting fallback and posting notification.")
+            // Persist a fallback so the SwiftUI root can pick it up if it missed the Notification
+            UserDefaults.standard.set(url.absoluteString, forKey: "pendingRecoveryURL")
 
-        if isRecoveryInQuery || isRecoveryInFragment {
-            print("DEBUG: Detected password recovery link. Posting notification and stopping.")
+            // also post notification (in case observer already exists)
             NotificationCenter.default.post(name: .didReceivePasswordRecoveryURL, object: url)
-            // For recovery, we only signal the app to show the reset view.
-            // We do NOT process the session here, as that could interfere with the flow.
+
             return true
         }
 
-        // For other links (e.g., magic link sign-in), process the session.
-        print("DEBUG: Regular auth callback. Processing session.")
+        // otherwise, process session normally
         Task {
             do {
                 _ = try await supabase.auth.session(from: url)
-                print("DEBUG: Supabase session processed from URL.")
+                print("Supabase session processed from AppDelegate.")
             } catch {
-                print("DEBUG: Error processing Supabase session: \(error.localizedDescription)")
+                print("Error processing session in AppDelegate: \(error)")
             }
         }
 
