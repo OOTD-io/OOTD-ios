@@ -23,18 +23,20 @@ struct OOTD_swiftApp: App {
                         return
                     }
 
+                    // Immediately check if this is a recovery URL and set the state.
+                    // This avoids the race condition on app startup.
+                    let components = URLComponents(url: url, resolvingAgainstBaseURL: true)
+                    if let fragment = components?.fragment, fragment.contains("type=recovery") {
+                        appRouter.showResetPasswordView = true
+                    }
+
+                    // Process the Supabase session in the background.
+                    // This will ensure the user is authenticated when they try to update their password.
                     Task {
                         do {
-                            // 1. Let Supabase process the URL to handle the session
                             try await supabase.auth.session(from: url)
-
-                            // 2. Check if it's a password recovery URL to trigger the UI
-                            let components = URLComponents(url: url, resolvingAgainstBaseURL: true)
-                            if let fragment = components?.fragment, fragment.contains("type=recovery") {
-                                appRouter.showResetPasswordView = true
-                            }
                         } catch {
-                            print("Error handling URL: \(error.localizedDescription)")
+                            print("Error processing Supabase session from URL: \(error.localizedDescription)")
                         }
                     }
                 }
