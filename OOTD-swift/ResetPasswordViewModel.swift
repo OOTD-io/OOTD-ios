@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Supabase
 
 @MainActor
 class ResetPasswordViewModel: ObservableObject {
