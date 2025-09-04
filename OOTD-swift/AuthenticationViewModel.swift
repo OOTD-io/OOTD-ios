@@ -188,6 +188,15 @@ extension AuthenticationViewModel {
             email,
             redirectTo: URL(string: "ootd://auth-callback")!
         )
+        // Persist a marker so incoming deeplink with a `code` can be treated as recovery.
+        let data: [String: Any] = [
+            "email": email,
+            "at": Date().timeIntervalSince1970
+        ]
+        if let json = try? JSONSerialization.data(withJSONObject: data, options: []),
+           let str = String(data: json, encoding: .utf8) {
+            UserDefaults.standard.set(str, forKey: "pendingPasswordReset")
+        }
     } catch {
         print("Error sending password reset: \(error.localizedDescription)")
         errorMessage = error.localizedDescription

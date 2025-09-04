@@ -50,18 +50,22 @@ struct OOTD_swiftApp: App {
     // Called from onOpenURL
     private func handleIncomingURL(_ url: URL) {
         print("OOTDApp.onOpenURL received: \(url)")
-        // quick sanity check and only handle our scheme
         guard url.scheme == "ootd", url.host == "auth-callback" else { return }
 
-        // If it's a recovery link, process it
         let components = URLComponents(url: url, resolvingAgainstBaseURL: true)
-        let isRecovery = components?.queryItems?.contains(where: { $0.name == "type" && $0.value == "recovery" }) ?? false
-        if isRecovery {
-            Task {
-                await processRecoveryURL(url)
-            }
+        let isRecoveryInQuery = components?.queryItems?.contains(where: { $0.name == "type" && $0.value == "recovery" }) ?? false
+        let isRecoveryInFragment = components?.fragment?.contains("type=recovery") ?? false
+
+        // New: treat 'code' + pendingPasswordReset as recovery
+        let hasCode = components?.queryItems?.contains(where: { $0.name == "code" }) ?? false
+        let hasPendingReset = isPendingPasswordResetRecent()
+
+        let treatAsRecovery = isRecoveryInQuery || isRecoveryInFragment || (hasCode && hasPendingReset)
+
+        if treatAsRecovery {
+            print("Detected recovery link (isRecoveryInQuery:\(isRecoveryInQuery) isRecoveryInFragment:\(isRecoveryInFragment) hasCode:\(hasCode) pendingReset:\(hasPendingReset)). Processing as recovery.")
+            Task { await processRecoveryURL(url) }
         } else {
-            // other auth flows: you may want to call supabase.session(from:) too
             Task {
                 do {
                     _ = try await supabase.auth.session(from: url)
@@ -73,20 +77,35 @@ struct OOTD_swiftApp: App {
         }
     }
 
+    // Helper: check pending reset within 30 minutes (adjust as you like)
+    private func isPendingPasswordResetRecent(maxAgeSeconds: TimeInterval = 30 * 60) -> Bool {
+        guard let str = UserDefaults.standard.string(forKey: "pendingPasswordReset"),
+              let data = str.data(using: .utf8),
+              let obj = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+              let at = obj["at"] as? TimeInterval else {
+            return false
+        }
+        let age = Date().timeIntervalSince1970 - at
+        let result = age >= 0 && age <= maxAgeSeconds
+        print("isPendingPasswordResetRecent check: age=\(age)s, isRecent=\(result)")
+        return result
+    }
+
     // Create session + then show reset UI
     private func processRecoveryURL(_ url: URL) async {
         do {
             print("Creating session from recovery URL...")
             _ = try await supabase.auth.session(from: url)
             print("Session created for recovery.")
-            // show reset UI on main actor
+            // Clear pending marker
+            UserDefaults.standard.removeObject(forKey: "pendingPasswordReset")
             await MainActor.run {
                 self.recoveryURL = url
                 self.showPasswordReset = true
             }
         } catch {
-            // If session creation fails, persist URL as fallback so AppDelegate/next launch can pick it up
             print("Failed to create session from recovery URL: \(error). Persisting pendingRecoveryURL for retry.")
+            // fallback persist raw url too
             UserDefaults.standard.set(url.absoluteString, forKey: "pendingRecoveryURL")
         }
     }
