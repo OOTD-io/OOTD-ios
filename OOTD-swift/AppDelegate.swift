@@ -26,8 +26,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
         print("DEBUG: AppDelegate received URL: \(url.absoluteString)")
 
-        // Make sure it matches ootd://auth-callback
-        guard url.scheme == "ootd", url.host == "auth-callback" else {
+        guard url.scheme == "ootd" && url.host == "auth-callback" else {
             print("DEBUG: URL is not for this app. Ignoring.")
             return false
         }
@@ -37,14 +36,16 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // Check for password recovery flow via query params
         if let queryItems = components?.queryItems,
            queryItems.contains(where: { $0.name == "type" && $0.value == "recovery" }) {
-            print("DEBUG: Detected password recovery link.")
-            // Post the notification to trigger the UI
+            print("DEBUG: Detected password recovery link. Posting notification and stopping.")
             NotificationCenter.default.post(name: .didReceivePasswordRecoveryURL, object: url)
-        } else {
-            print("DEBUG: Regular auth callback (sign-in or magic link).")
+            // For recovery, we just need to signal the app to show the reset view.
+            // We do NOT process the session here, as that would log the user in
+            // and interfere with the navigation flow.
+            return true
         }
 
-        // Process session regardless, as it might be a magic link sign-in
+        // For other links (like magic link sign-in), process the session.
+        print("DEBUG: Regular auth callback. Processing session.")
         Task {
             do {
                 _ = try await supabase.auth.session(from: url)
