@@ -33,18 +33,19 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
         let components = URLComponents(url: url, resolvingAgainstBaseURL: true)
 
-        // Check for password recovery flow via query params
-        if let queryItems = components?.queryItems,
-           queryItems.contains(where: { $0.name == "type" && $0.value == "recovery" }) {
+        // Robustly check for recovery type in EITHER query params OR the fragment.
+        let isRecoveryInQuery = components?.queryItems?.contains(where: { $0.name == "type" && $0.value == "recovery" }) ?? false
+        let isRecoveryInFragment = components?.fragment?.contains("type=recovery") ?? false
+
+        if isRecoveryInQuery || isRecoveryInFragment {
             print("DEBUG: Detected password recovery link. Posting notification and stopping.")
             NotificationCenter.default.post(name: .didReceivePasswordRecoveryURL, object: url)
-            // For recovery, we just need to signal the app to show the reset view.
-            // We do NOT process the session here, as that would log the user in
-            // and interfere with the navigation flow.
+            // For recovery, we only signal the app to show the reset view.
+            // We do NOT process the session here, as that could interfere with the flow.
             return true
         }
 
-        // For other links (like magic link sign-in), process the session.
+        // For other links (e.g., magic link sign-in), process the session.
         print("DEBUG: Regular auth callback. Processing session.")
         Task {
             do {
