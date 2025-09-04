@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ResetPasswordView: View {
     @StateObject private var viewModel = ResetPasswordViewModel()
+    @EnvironmentObject private var appRouter: AppRouter
 
     var body: some View {
         VStack(spacing: 20) {
@@ -23,6 +24,18 @@ struct ResetPasswordView: View {
                 Text("You can now log in with your new password.")
                     .multilineTextAlignment(.center)
                     .padding()
+
+                Button(action: {
+                    appRouter.showResetPasswordView = false
+                }) {
+                    Text("Done")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .cornerRadius(10)
+                }
             } else {
                 // Form State
                 Text("Reset Your Password")
