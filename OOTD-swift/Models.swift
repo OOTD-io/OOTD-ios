@@ -32,10 +32,10 @@ struct ClothingItem: Codable, Identifiable {
 }
 
 struct WeatherSuitability: Codable {
-    let hot: Bool
-    let warm: Bool
-    let cool: Bool
-    let cold: Bool
+    let hot: Bool?
+    let warm: Bool?
+    let cool: Bool?
+    let cold: Bool?
 }
 
 struct ClothingImages: Codable {
