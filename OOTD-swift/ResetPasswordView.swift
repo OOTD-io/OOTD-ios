@@ -4,84 +4,78 @@
 //
 //  Created by Jules on 9/3/25.
 //
+//  Implementation based on user-provided guide.
+//
 
 import SwiftUI
+import Supabase
 
 struct ResetPasswordView: View {
-    @StateObject private var viewModel = ResetPasswordViewModel()
-    @EnvironmentObject private var appRouter: AppRouter
+    let url: URL? // Passed in, though not directly used in the logic.
+    @State private var newPassword = ""
+    @State private var confirmPassword = ""
+    @State private var errorMessage: String?
+    @State private var isPasswordUpdated = false
+    @Environment(\.dismiss) var dismiss
 
     var body: some View {
         VStack(spacing: 20) {
-            if viewModel.isPasswordUpdated {
-                // Success State
+            if isPasswordUpdated {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 60))
                     .foregroundColor(.green)
                 Text("Password Updated!")
                     .font(.title)
                     .bold()
-                Text("You can now log in with your new password.")
-                    .multilineTextAlignment(.center)
+                Text("You may now close this screen.")
                     .padding()
-
-                Button(action: {
-                    appRouter.showResetPasswordView = false
-                }) {
-                    Text("Done")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.blue)
-                        .cornerRadius(10)
+                Button("Done") {
+                    dismiss()
                 }
+                .buttonStyle(.borderedProminent)
+
             } else {
-                // Form State
                 Text("Reset Your Password")
-                    .font(.largeTitle)
+                    .font(.title)
                     .fontWeight(.bold)
 
-                Text("Enter and confirm your new password below.")
-                    .foregroundColor(.secondary)
-
-                SecureField("New Password", text: $viewModel.password)
+                SecureField("New Password", text: $newPassword)
                     .padding()
                     .background(Color(UIColor.systemGray6))
                     .cornerRadius(10)
 
-                SecureField("Confirm New Password", text: $viewModel.confirmPassword)
+                SecureField("Confirm New Password", text: $confirmPassword)
                     .padding()
                     .background(Color(UIColor.systemGray6))
                     .cornerRadius(10)
 
-                if let errorMessage = viewModel.errorMessage {
-                    Text(errorMessage)
+                if newPassword != confirmPassword && !confirmPassword.isEmpty {
+                    Text("Passwords do not match.")
                         .foregroundColor(.red)
                         .font(.caption)
                 }
 
-                Button(action: {
-                    Task { await viewModel.updatePassword() }
-                }) {
-                    Text("Update Password")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(viewModel.isValid ? Color.blue : Color.gray)
-                        .cornerRadius(10)
+                if let error = errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .font(.caption)
                 }
-                .disabled(!viewModel.isValid)
-            }
 
-            Spacer()
+                Button("Update Password") {
+                    Task {
+                        do {
+                            try await supabase.auth.update(user: UserAttributes(password: newPassword))
+                            self.errorMessage = nil
+                            self.isPasswordUpdated = true
+                        } catch {
+                            self.errorMessage = error.localizedDescription
+                        }
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(newPassword.isEmpty || newPassword != confirmPassword)
+            }
         }
         .padding()
-        .navigationTitle("Reset Password")
     }
-}
-
-#Preview {
-    ResetPasswordView()
 }

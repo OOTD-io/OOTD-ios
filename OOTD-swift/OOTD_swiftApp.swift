@@ -10,30 +10,11 @@ import SwiftUI
 @main
 struct OOTD_swiftApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    @StateObject private var appRouter = AppRouter()
 
     var body: some Scene {
         WindowGroup {
-            Group {
-                if appRouter.showResetPasswordView {
-                    // If a reset link was clicked, show the ResetPasswordView first.
-                    NavigationView {
-                        ResetPasswordView()
-                            .environmentObject(appRouter) // Pass router for dismissal
-                    }
-                } else {
-                    // Otherwise, show the normal content view.
-                    ContentView()
-                        .environmentObject(appRouter) // Pass router for other potential navigation
-                }
-            }
-            .preferredColorScheme(.light)
-            .onReceive(NotificationCenter.default.publisher(for: .didReceivePasswordRecoveryURL)) { _ in
-                print("DEBUG: App received password recovery notification. Setting state.")
-                // No delay this time, we are relying on the AppDelegate to be the primary handler.
-                // The state change should be immediate.
-                appRouter.showResetPasswordView = true
-            }
+            ContentView()
+                .preferredColorScheme(.light)
         }
     }
 }

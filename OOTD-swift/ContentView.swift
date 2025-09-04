@@ -8,8 +8,10 @@
 import SwiftUI
 
 struct ContentView: View {
-    // This view no longer handles routing. It's just the main content view.
     @StateObject private var locationManager = LocationManager()
+
+    @State private var showPasswordReset = false
+    @State private var recoveryURL: URL?
 
     var body: some View {
         NavigationView {
@@ -26,6 +28,17 @@ struct ContentView: View {
         }
         .onAppear {
             locationManager.requestLocationPermission()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .didReceivePasswordRecoveryURL)) { notif in
+            if let url = notif.object as? URL {
+                self.recoveryURL = url
+                self.showPasswordReset = true
+            }
+        }
+        .sheet(isPresented: $showPasswordReset) {
+            // The user's guide shows passing the URL to the view.
+            // Even if it's not used, it's good practice to follow the guide.
+            ResetPasswordView(url: recoveryURL)
         }
     }
 }
