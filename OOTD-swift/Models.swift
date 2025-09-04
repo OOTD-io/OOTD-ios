@@ -53,10 +53,10 @@ struct SaveClothingRequest: Codable {
 
 // MARK: - Generate Outfit Request
 struct GenerateOutfitRequest: Codable {
-    let weather: WeatherCondition
+    let weather: APIWeatherCondition
 }
 
-struct WeatherCondition: Codable {
+struct APIWeatherCondition: Codable {
     let temperature: Double  // Fahrenheit
     let condition: String    // "sunny", "rainy", "cloudy", "snowy"
 }

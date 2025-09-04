@@ -17,7 +17,7 @@ class OutfitViewModel: ObservableObject {
     // Simple in-memory cache
     private var cachedOutfits: [Outfit]?
 
-    func generateOutfitsIfNeeded(for weather: WeatherCondition) async {
+    func generateOutfitsIfNeeded(for weather: APIWeatherCondition) async {
         // If we have cached outfits, use them
         if let cachedOutfits = cachedOutfits {
             self.outfits = cachedOutfits

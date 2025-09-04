@@ -12,7 +12,7 @@ class WeatherManager: ObservableObject {
     private let service = WeatherService()
     
     @Published var currentWeather: CurrentWeather?
-    @Published var apiWeatherCondition: WeatherCondition?
+    @Published var apiWeatherCondition: APIWeatherCondition?
 
     func fetchWeather(for location: CLLocation) async {
         do {
@@ -28,7 +28,7 @@ class WeatherManager: ObservableObject {
         }
     }
 
-    private func convertToAPIWeatherCondition(_ currentWeather: CurrentWeather) -> WeatherCondition {
+    private func convertToAPIWeatherCondition(_ currentWeather: CurrentWeather) -> APIWeatherCondition {
         let temperatureF = currentWeather.temperature.converted(to: .fahrenheit).value
 
         let conditionString: String
@@ -46,6 +46,6 @@ class WeatherManager: ObservableObject {
             conditionString = "cloudy"
         }
 
-        return WeatherCondition(temperature: temperatureF, condition: conditionString)
+        return APIWeatherCondition(temperature: temperatureF, condition: conditionString)
     }
 }
