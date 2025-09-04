@@ -20,23 +20,19 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                      open url: URL,
                      options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
 
-        // Ensure we are only handling our app's specific auth URLs
-        guard url.scheme == "ootd" && url.host == "auth-callback" else {
-            return false
-        }
-
-        // Post a notification if it's a password recovery link
-        let components = URLComponents(url: url, resolvingAgainstBaseURL: true)
-        if let fragment = components?.fragment, fragment.contains("type=recovery") {
+        // Use the official Supabase helper function to identify a sign-in link.
+        // This is more reliable than manually parsing the URL fragment.
+        if supabase.auth.isSignInWithEmailLink(url.absoluteString) {
+            // Post a notification to the SwiftUI App lifecycle to trigger navigation.
             NotificationCenter.default.post(name: .didReceivePasswordRecoveryURL, object: nil)
-        }
 
-        // Always try to process the session from the URL
-        Task {
-            do {
-                _ = try await supabase.auth.session(from: url)
-            } catch {
-                print("Error processing Supabase session from URL in AppDelegate: \(error.localizedDescription)")
+            // Task to process the session from the URL, which authenticates the user.
+            Task {
+                do {
+                    _ = try await supabase.auth.session(from: url)
+                } catch {
+                    print("Error processing Supabase session from URL in AppDelegate: \(error.localizedDescription)")
+                }
             }
         }
 
