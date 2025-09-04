@@ -180,6 +180,19 @@ extension AuthenticationViewModel {
 //      return false
 //    }
   }
+
+  func sendPasswordReset(for email: String) async {
+    do {
+        print("Sending password reset for \(email)")
+        try await supabase.auth.resetPassword(
+            for: email,
+            redirectTo: URL(string: "com.ootd.dev://reset-password")!
+        )
+    } catch {
+        print("Error sending password reset: \(error.localizedDescription)")
+        errorMessage = error.localizedDescription
+    }
+  }
 }
 
 // MARK: Sign in with Apple

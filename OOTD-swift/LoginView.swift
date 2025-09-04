@@ -39,6 +39,9 @@ struct LoginView: View {
   @Environment(\.colorScheme) var colorScheme
   @Environment(\.dismiss) var dismiss
 
+  @State private var showingForgotPasswordAlert = false
+  @State private var forgotPasswordEmail = ""
+
   @FocusState private var focus: FocusableField?
 
   private func signInWithEmailPassword() {
@@ -87,6 +90,13 @@ struct LoginView: View {
       .padding(.vertical, 6)
       .background(Divider(), alignment: .bottom)
       .padding(.bottom, 8)
+
+      Button(action: { showingForgotPasswordAlert = true }) {
+        Text("Forgot Password?")
+          .fontWeight(.semibold)
+      }
+      .frame(maxWidth: .infinity, alignment: .trailing)
+      .padding(.bottom, 10)
 
       if !viewModel.errorMessage.isEmpty {
         VStack {
@@ -140,6 +150,19 @@ struct LoginView: View {
     }
     .listStyle(.plain)
     .padding()
+    .alert("Forgot Password", isPresented: $showingForgotPasswordAlert) {
+      TextField("Email", text: $forgotPasswordEmail)
+        .textInputAutocapitalization(.never)
+      Button("Send Reset Link", action: {
+        Task {
+          await viewModel.sendPasswordReset(for: forgotPasswordEmail)
+          // Optionally, show another alert confirming the email was sent
+        }
+      })
+      Button("Cancel", role: .cancel) { }
+    } message: {
+      Text("Enter your account email address to receive a password reset link.")
+    }
 //    .analyticsScreen(name: "\(Self.self)")
   }
 }

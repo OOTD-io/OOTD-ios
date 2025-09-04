@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject private var appRouter: AppRouter
     @StateObject private var locationManager = LocationManager()
 
     var body: some View {
@@ -25,6 +26,13 @@ struct ContentView: View {
         }
         .onAppear {
             locationManager.requestLocationPermission()
+        }
+        .sheet(isPresented: $appRouter.showResetPasswordView) {
+            // The ResetPasswordView should probably be in its own NavigationView
+            // to have a proper title bar and structure.
+            NavigationView {
+                ResetPasswordView()
+            }
         }
     }
 }
