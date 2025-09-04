@@ -184,8 +184,8 @@ extension AuthenticationViewModel {
   func sendPasswordReset(for email: String) async {
     do {
         print("Sending password reset for \(email)")
-        try await supabase.auth.resetPassword(
-            for: email,
+        try await supabase.auth.resetPasswordForEmail(
+            email,
             redirectTo: URL(string: "com.ootd.dev://reset-password")!
         )
     } catch {
