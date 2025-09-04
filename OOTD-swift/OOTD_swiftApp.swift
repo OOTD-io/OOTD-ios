@@ -14,32 +14,43 @@ struct OOTD_swiftApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .preferredColorScheme(.light)
-                .environmentObject(appRouter)
-                .onOpenURL { url in
-                    // Ensure we are only handling our app's specific auth URLs
-                    guard url.scheme == "ootd" && url.host == "auth-callback" else {
-                        return
+            Group {
+                if appRouter.showResetPasswordView {
+                    // If a reset link was clicked, show the ResetPasswordView first.
+                    NavigationView {
+                        ResetPasswordView()
+                            .environmentObject(appRouter) // Pass router for dismissal
                     }
+                } else {
+                    // Otherwise, show the normal content view.
+                    ContentView()
+                        .environmentObject(appRouter) // Pass router for other potential navigation
+                }
+            }
+            .preferredColorScheme(.light)
+            .onOpenURL { url in
+                // Ensure we are only handling our app's specific auth URLs
+                guard url.scheme == "ootd" && url.host == "auth-callback" else {
+                    return
+                }
 
-                    // Immediately check if this is a recovery URL and set the state.
-                    // This avoids the race condition on app startup.
-                    let components = URLComponents(url: url, resolvingAgainstBaseURL: true)
-                    if let fragment = components?.fragment, fragment.contains("type=recovery") {
-                        appRouter.showResetPasswordView = true
-                    }
+                // Immediately check if this is a recovery URL and set the state.
+                // This avoids the race condition on app startup.
+                let components = URLComponents(url: url, resolvingAgainstBaseURL: true)
+                if let fragment = components?.fragment, fragment.contains("type=recovery") {
+                    appRouter.showResetPasswordView = true
+                }
 
-                    // Process the Supabase session in the background.
-                    // This will ensure the user is authenticated when they try to update their password.
-                    Task {
-                        do {
-                            try await supabase.auth.session(from: url)
-                        } catch {
-                            print("Error processing Supabase session from URL: \(error.localizedDescription)")
-                        }
+                // Process the Supabase session in the background.
+                // This will ensure the user is authenticated when they try to update their password.
+                Task {
+                    do {
+                        try await supabase.auth.session(from: url)
+                    } catch {
+                        print("Error processing Supabase session from URL: \(error.localizedDescription)")
                     }
                 }
+            }
         }
     }
 }
