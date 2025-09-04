@@ -39,7 +39,7 @@ class ClothingUploadViewModel: ObservableObject {
 
         do {
             // 3. Get auth token
-            let session = try await Supabase.client.auth.session
+            let session = try await supabase.auth.session
             let token = session.accessToken
 
             // 4. Make API call

@@ -15,7 +15,7 @@ struct ClothingListView: View {
     var body: some View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 20)], spacing: 20) {
-                ForEach(items) { item in
+                ForEach(items, id: \.id) { item in
                     ClothingNavigationTile(clothing: item, isLarge: true)
                 }
             }

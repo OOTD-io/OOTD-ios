@@ -30,7 +30,7 @@ class OutfitViewModel: ObservableObject {
         let requestBody = GenerateOutfitRequest(weather: weather)
 
         do {
-            let session = try await Supabase.client.auth.session
+            let session = try await supabase.auth.session
             let token = session.accessToken
 
             let url = URL(string: "https://ootd-ai-engine-785972969271.us-central1.run.app/api/outfits/generate")!
