@@ -9,7 +9,7 @@ import SwiftUI
 import AuthenticationServices
 
 struct HomeView<Content>: View where Content: View {
-    @StateObject private var viewModel = AuthenticationViewModel()
+    @EnvironmentObject var viewModel: AuthenticationViewModel
     @State private var presentingLoginScreen = false
     @State private var presentingProfileScreen = false
 

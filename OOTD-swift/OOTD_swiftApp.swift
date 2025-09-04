@@ -32,6 +32,8 @@ struct OOTD_swiftApp: App {
                     .environmentObject(authViewModel)
                 } else {
                     // If not authenticated, show the AuthenticationView wrapper.
+                    // Note: The user's guide suggested LoginView(), but AuthenticationView
+                    // contains the logic to switch between Login and Sign Up, so it's more complete.
                     AuthenticationView()
                         .environmentObject(authViewModel)
                 }
