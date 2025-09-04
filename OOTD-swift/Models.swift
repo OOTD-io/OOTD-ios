@@ -56,7 +56,7 @@ struct GenerateOutfitRequest: Codable {
     let weather: APIWeatherCondition
 }
 
-struct APIWeatherCondition: Codable {
+struct APIWeatherCondition: Codable, Equatable {
     let temperature: Double  // Fahrenheit
     let condition: String    // "sunny", "rainy", "cloudy", "snowy"
 }

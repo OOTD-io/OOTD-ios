@@ -29,8 +29,10 @@ struct ClosetView: View {
             ScrollView {
                 VStack {
                     // Weather Card and Outfit Section
-                    WeatherCard(weather: weatherManager.currentWeather)
-                        .padding(.horizontal)
+                    if let currentWeather = weatherManager.currentWeather {
+                        WeatherCard(weather: currentWeather)
+                            .padding(.horizontal)
+                    }
 
                     OutfitSectionView(viewModel: outfitViewModel)
 
