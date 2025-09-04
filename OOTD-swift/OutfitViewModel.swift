@@ -69,4 +69,10 @@ class OutfitViewModel: ObservableObject {
 
         isLoading = false
     }
+
+    func forceRegenerateOutfits(for weather: APIWeatherCondition) async {
+        // Clear cache and then call the generation function
+        cachedOutfits = nil
+        await generateOutfitsIfNeeded(for: weather)
+    }
 }

@@ -50,13 +50,16 @@ struct ClosetView: View {
             }
         }
         .sheet(isPresented: $showingUploadSheet, onDismiss: {
-            Task { await closetViewModel.fetchClothing() }
+            Task {
+                closetViewModel.clearCache()
+                await closetViewModel.fetchClothingIfNeeded()
+            }
         }) {
             ClothingUploadView()
         }
         .onAppear {
             Task {
-                await closetViewModel.fetchClothing()
+                await closetViewModel.fetchClothingIfNeeded()
             }
         }
     }

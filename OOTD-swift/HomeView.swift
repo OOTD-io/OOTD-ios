@@ -49,7 +49,14 @@ struct HomeView<Content>: View where Content: View {
                             }
 
                             // Outfit Section is also at the top level.
-                            OutfitSectionView(viewModel: outfitViewModel)
+                            OutfitSectionView(viewModel: outfitViewModel) {
+                                // This is the onRegenerate closure
+                                Task {
+                                    if let weather = weatherManager.apiWeatherCondition {
+                                        await outfitViewModel.forceRegenerateOutfits(for: weather)
+                                    }
+                                }
+                            }
 
                             // ClosetView is now just for the clothes.
                             ClosetView()
@@ -156,13 +163,22 @@ struct TabBarButton: View {
 // Moved from ClosetView's file to be used here.
 struct OutfitSectionView: View {
     @ObservedObject var viewModel: OutfitViewModel
+    var onRegenerate: () -> Void // Callback to trigger regeneration
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text("✨ Suggested Outfits")
-                .font(.title2)
-                .fontWeight(.bold)
-                .padding(.horizontal)
+            HStack {
+                Text("✨ Suggested Outfits")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                Spacer()
+                Button(action: onRegenerate) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.headline)
+                }
+                .disabled(viewModel.isLoading)
+            }
+            .padding(.horizontal)
 
             if viewModel.isLoading {
                 ProgressView("Generating outfits...")

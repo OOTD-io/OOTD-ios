@@ -14,10 +14,19 @@ class ClosetViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
 
+    // Simple in-memory cache for the session
+    private var cachedClothingItems: [String: [ClothingItem]]?
+
     // Define the order of categories
     let categories = ["Tops", "Bottoms", "Outwear", "Other"]
 
-    func fetchClothing() async {
+    func fetchClothingIfNeeded() async {
+        // 1. Use cache if available
+        if let cachedItems = cachedClothingItems {
+            self.clothingItems = cachedItems
+            return
+        }
+
         isLoading = true
         errorMessage = nil
 
@@ -69,6 +78,7 @@ class ClosetViewModel: ObservableObject {
             }
 
             self.clothingItems = groupedItems
+            self.cachedClothingItems = groupedItems // 2. Populate cache on success
 
         } catch {
             self.errorMessage = "We couldn't load your closet. Please check your connection and try again."
@@ -76,5 +86,9 @@ class ClosetViewModel: ObservableObject {
         }
 
         isLoading = false
+    }
+
+    func clearCache() {
+        cachedClothingItems = nil
     }
 }
