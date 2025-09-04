@@ -96,6 +96,7 @@ struct HomeView<Content>: View where Content: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding(.bottom, 80) // Add padding to prevent content from being hidden by tab bar
             
             // Custom Tab Bar
             customTabBar
@@ -104,39 +105,44 @@ struct HomeView<Content>: View where Content: View {
     }
 
     var customTabBar: some View {
-        HStack {
-            Spacer()
-            TabBarButton(icon: "tshirt.fill", text: "Closet", isSelected: selectedTab == .closet) {
-                selectedTab = .closet
-            }
-            Spacer()
-            // The center "add" button from ClosetView is now the main way to add clothes.
-            // This button could be used for other "add" actions if needed.
-            // For now, we link it to the .add tab.
-            Button(action: {
-                selectedTab = .add
-            }) {
-                ZStack {
-                    Circle()
-                        .foregroundColor(.blue)
-                        .frame(width: 56, height: 56)
-                        .shadow(radius: 4)
-                    Image(systemName: "plus")
-                        .foregroundColor(.white)
-                        .font(.system(size: 24, weight: .bold))
+        // This VStack ensures the tab bar is pushed to the very bottom of the screen.
+        VStack(spacing: 0) {
+            Spacer() // Pushes the HStack to the bottom
+            HStack {
+                Spacer()
+                TabBarButton(icon: "tshirt.fill", text: "Closet", isSelected: selectedTab == .closet) {
+                    selectedTab = .closet
                 }
+                Spacer()
+                Button(action: {
+                    selectedTab = .add
+                }) {
+                    ZStack {
+                        Circle()
+                            .foregroundColor(.blue)
+                            .frame(width: 56, height: 56)
+                            .shadow(radius: 4)
+                        Image(systemName: "plus")
+                            .foregroundColor(.white)
+                            .font(.system(size: 24, weight: .bold))
+                    }
+                }
+                Spacer()
+                TabBarButton(icon: "person.crop.circle", text: "Profile", isSelected: selectedTab == .profile) {
+                    selectedTab = .profile
+                }
+                .onReceive(NotificationCenter.default.publisher(for: ASAuthorizationAppleIDProvider.credentialRevokedNotification)) { _ in
+                    // Handle sign out if needed
+                }
+                Spacer()
             }
-            Spacer()
-            TabBarButton(icon: "person.crop.circle", text: "Profile", isSelected: selectedTab == .profile) {
-                selectedTab = .profile
-            }
-            .onReceive(NotificationCenter.default.publisher(for: ASAuthorizationAppleIDProvider.credentialRevokedNotification)) { _ in
-                // Handle sign out if needed
-            }
-            Spacer()
+            .padding(.top, 12)
+            // The background now fills the entire bottom area, including the safe area.
+            // The buttons themselves are padded by the safe area automatically.
+            .frame(maxWidth: .infinity)
+            .background(Color(UIColor.systemBackground).ignoresSafeArea(edges: .bottom))
+            .shadow(radius: 2)
         }
-        .padding(.top, 10)
-        .background(Color(UIColor.systemBackground).shadow(radius: 2))
     }
 }
 

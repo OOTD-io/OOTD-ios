@@ -18,7 +18,7 @@ class ClosetViewModel: ObservableObject {
     private var cachedClothingItems: [String: [ClothingItem]]?
 
     // Define the order of categories
-    let categories = ["Tops", "Bottoms", "Outwear", "Other"]
+    let categories = ["Tops", "Bottoms", "Outwear", "Shoes", "Other"]
 
     func fetchClothingIfNeeded() async {
         // 1. Use cache if available
