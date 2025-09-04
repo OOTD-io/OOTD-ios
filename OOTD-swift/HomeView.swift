@@ -8,15 +8,16 @@
 import SwiftUI
 import AuthenticationServices
 
-
-
-struct HomeView<Content>: View where Content: View{
+struct HomeView<Content>: View where Content: View {
     @StateObject private var viewModel = AuthenticationViewModel()
     @State private var presentingLoginScreen = false
     @State private var presentingProfileScreen = false
+
+    // Centralized state management for weather and outfits
     @StateObject private var locationManager = LocationManager()
     @StateObject private var weatherManager = WeatherManager()
-    
+    @StateObject private var outfitViewModel = OutfitViewModel()
+
     @ViewBuilder var content: () -> Content
     
     enum Tab {
@@ -25,40 +26,61 @@ struct HomeView<Content>: View where Content: View{
     
     @State private var selectedTab: Tab = .closet
 
-
-
     var body: some View {
-        
         ZStack(alignment: .bottom) {
+            // This content view is from the original template, seems to be unused
+            // when authenticated. Keeping it for now.
             content()
 
             // Main content based on selected tab
             Group {
                 switch selectedTab {
                 case .closet:
-//                    VStack {
-                        // Weather View
-                    ScrollView() {
-                        // Weather View
-                        if let weather = weatherManager.currentWeather {
-                            WeatherCard(weather: weather)
-                                .padding(.vertical, 8)
-                        } else {
-                            Text("Loading weather…")
-                                .foregroundColor(.gray)
-                                .onAppear {
-                                    if let loc = locationManager.location {
-                                        Task {
-                                            await weatherManager.fetchWeather(for: loc)
-                                        }
-                                    }
-                                }
+                    // The NavigationView now lives here, controlling the closet tab's stack.
+                    NavigationView {
+                        ScrollView {
+                            // Weather Card is displayed once, at the top level.
+                            if let weather = weatherManager.currentWeather {
+                                WeatherCard(weather: weather)
+                                    .padding(.vertical, 8)
+                            } else {
+                                ProgressView("Loading Weather…")
+                                    .padding()
+                            }
+
+                            // Outfit Section is also at the top level.
+                            OutfitSectionView(viewModel: outfitViewModel)
+
+                            // ClosetView is now just for the clothes.
+                            ClosetView()
                         }
-                        ClosetView()
+                        // .navigationTitle is now on the ScrollView's content
                     }
-                    
+                    .onAppear {
+                        // This logic now lives in the HomeView, which is a more stable parent view.
+                        locationManager.requestLocationPermission()
+                    }
+                    .onChange(of: locationManager.location) { location in
+                        guard let location = location else { return }
+                        Task {
+                            await weatherManager.fetchWeather(for: location)
+                        }
+                    }
+                    .onChange(of: weatherManager.apiWeatherCondition) { weatherCondition in
+                        guard let weatherCondition = weatherCondition else { return }
+                        Task {
+                            await outfitViewModel.generateOutfitsIfNeeded(for: weatherCondition)
+                        }
+                    }
+
                 case .add:
+                    // The upload view is simple and doesn't need a NavigationView here.
+                    // It's presented as a sheet from ClosetView.
+                    // To make the '+' tab work, we can just show a placeholder or
+                    // have it switch to the closet and open the sheet.
+                    // For now, showing the view directly is fine.
                     ClothingUploadView()
+
                 case .profile:
                     NavigationView {
                       UserProfileView()
@@ -67,92 +89,129 @@ struct HomeView<Content>: View where Content: View{
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color(.systemGroupedBackground))
             
             // Custom Tab Bar
-            HStack {
-                Spacer()
-
-                Button(action: {
-                    selectedTab = .closet
-                }) {
-                    VStack {
-                        Image(systemName: "tshirt.fill")
-                        Text("Closet")
-                            .font(.caption2)
-                    }
-                }
-                .foregroundColor(selectedTab == .closet ? .blue : .gray)
-
-                Spacer()
-
-                Button(action: {
-                    
-                    selectedTab = .add
-                }) {
-                    ZStack {
-                        Circle()
-                            .foregroundColor(.blue)
-                            .frame(width: 56, height: 56)
-                            .shadow(radius: 4)
-
-                        Image(systemName: "plus")
-                            .foregroundColor(.white)
-                            .font(.system(size: 24, weight: .bold))
-                    }
-                }
-//                            .offset(y: -20)
-
-                Spacer()
-
-                Button(action: {
-                    selectedTab = .profile
-                }) {
-                    VStack {
-                        Image(systemName: "person.crop.circle")
-                        Text("Profile")
-                        .font(.caption2)
-                    }
-                }
-                .foregroundColor(selectedTab == .profile ? .blue : .gray)
-                .onReceive(NotificationCenter.default.publisher(for: ASAuthorizationAppleIDProvider.credentialRevokedNotification)) { event in
-//                signOut()
-                  if let userInfo = event.userInfo, let info = userInfo["info"] {
-                    print(info)
-                  }
-                }
-
-                Spacer()
-            }
-            .padding(.vertical, 10)
-            .background(Color.white.ignoresSafeArea(edges: .bottom))
-//            .clipShape(RoundedRectangle(cornerRadius: 20))
-            .shadow(color: .gray.opacity(0.2), radius: 5, y: -2)
-            .offset(y:30)
+            customTabBar
         }
+        .ignoresSafeArea(.keyboard) // Prevents keyboard from pushing up tab bar
+    }
+
+    var customTabBar: some View {
+        HStack {
+            Spacer()
+            TabBarButton(icon: "tshirt.fill", text: "Closet", isSelected: selectedTab == .closet) {
+                selectedTab = .closet
+            }
+            Spacer()
+            // The center "add" button from ClosetView is now the main way to add clothes.
+            // This button could be used for other "add" actions if needed.
+            // For now, we link it to the .add tab.
+            Button(action: {
+                selectedTab = .add
+            }) {
+                ZStack {
+                    Circle()
+                        .foregroundColor(.blue)
+                        .frame(width: 56, height: 56)
+                        .shadow(radius: 4)
+                    Image(systemName: "plus")
+                        .foregroundColor(.white)
+                        .font(.system(size: 24, weight: .bold))
+                }
+            }
+            Spacer()
+            TabBarButton(icon: "person.crop.circle", text: "Profile", isSelected: selectedTab == .profile) {
+                selectedTab = .profile
+            }
+            .onReceive(NotificationCenter.default.publisher(for: ASAuthorizationAppleIDProvider.credentialRevokedNotification)) { _ in
+                // Handle sign out if needed
+            }
+            Spacer()
+        }
+        .padding(.top, 10)
+        .background(Color(UIColor.systemBackground).shadow(radius: 2))
     }
 }
 
-// Placeholder Views
-//struct ClosetView: View {
-//    var body: some View {
-//        Text("Closet")
-//    }
-//}
+// Helper view for the tab bar buttons
+struct TabBarButton: View {
+    let icon: String
+    let text: String
+    let isSelected: Bool
+    let action: () -> Void
 
-struct AddView: View {
     var body: some View {
-        Text("Add New Item")
+        Button(action: action) {
+            VStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 22))
+                Text(text)
+                    .font(.caption2)
+            }
+        }
+        .foregroundColor(isSelected ? .blue : .gray)
     }
 }
 
-struct ProfileView: View {
+// Moved from ClosetView's file to be used here.
+struct OutfitSectionView: View {
+    @ObservedObject var viewModel: OutfitViewModel
+
     var body: some View {
-        Text("Profile")
+        VStack(alignment: .leading) {
+            Text("✨ Suggested Outfits")
+                .font(.title2)
+                .fontWeight(.bold)
+                .padding(.horizontal)
+
+            if viewModel.isLoading {
+                ProgressView("Generating outfits...")
+                    .frame(height: 150)
+                    .frame(maxWidth: .infinity)
+            } else if let errorMessage = viewModel.errorMessage {
+                Text(errorMessage)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding()
+                    .frame(maxWidth: .infinity, minHeight: 150)
+                    .background(Color(UIColor.systemGray6))
+                    .cornerRadius(12)
+                    .padding(.horizontal)
+            } else if viewModel.outfits.isEmpty {
+                Text("No outfits generated yet. Add more clothes to your closet!")
+                    .foregroundColor(.secondary)
+                    .frame(height: 150)
+                    .frame(maxWidth: .infinity)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 20) {
+                        ForEach(viewModel.outfits) { outfit in
+                            NavigationLink(destination: OutfitDetailView(outfit: outfit)) {
+                                OutfitTile(outfit: outfit)
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+            }
+        }
+        .padding(.vertical)
     }
 }
 
+// Moved from ClosetView's file to be used here.
+struct OutfitTile: View {
+    let outfit: Outfit
 
-#Preview {
-//    HomeView(nil, nil)
+    var body: some View {
+        AsyncImage(url: URL(string: outfit.image_url)) { image in
+            image.resizable().aspectRatio(contentMode: .fill)
+        } placeholder: {
+            ProgressView()
+        }
+        .frame(width: 150, height: 200)
+        .background(Color.gray.opacity(0.2))
+        .clipped()
+        .cornerRadius(12)
+    }
 }
