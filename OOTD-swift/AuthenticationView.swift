@@ -27,7 +27,6 @@
 
 import SwiftUI
 import Combine
-import Supabase
 
 struct AuthenticationView: View {
   @EnvironmentObject var viewModel: AuthenticationViewModel

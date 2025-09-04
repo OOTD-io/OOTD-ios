@@ -8,92 +8,182 @@
 import SwiftUI
 
 struct ClosetView: View {
-    @StateObject private var closetViewModel = ClosetViewModel()
-    @State private var showingUploadSheet = false
-
-    private func icon(for category: String) -> String {
-        switch category {
-        case "Tops": return "👕"
-        case "Bottoms": return "👖"
-        case "Outwear": return "🧥"
-        case "Shoes": return "👟"
-        default: return "👔"
-        }
-    }
-
     var body: some View {
-        // NOTE: The NavigationView, WeatherCard, and OutfitSection have been moved to HomeView
-        // to fix navigation and state management bugs. This view is now only responsible
-        // for displaying the clothing items.
-        VStack {
-            if closetViewModel.isLoading {
-                ProgressView("Loading your closet...")
-            } else if let errorMessage = closetViewModel.errorMessage {
-                Text("Error: \(errorMessage)").foregroundColor(.red).padding()
-            } else {
-                ForEach(closetViewModel.categories, id: \.self) { category in
-                    if let items = closetViewModel.clothingItems[category], !items.isEmpty {
-                        ClothingSectionView(
-                            title: "\(icon(for: category)) \(category)",
-                            items: items
-                        )
-                    }
-                }
-            }
-        }
-        .navigationTitle("My Closet")
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: { showingUploadSheet = true }) {
-                    Image(systemName: "plus")
-                }
-            }
-        }
-        .sheet(isPresented: $showingUploadSheet, onDismiss: {
-            Task {
-                closetViewModel.clearCache()
-                await closetViewModel.fetchClothingIfNeeded()
-            }
-        }) {
-            ClothingUploadView()
-        }
-        .onAppear {
-            Task {
-                await closetViewModel.fetchClothingIfNeeded()
-            }
-        }
-    }
-}
-
-struct ClothingSectionView: View {
-    let title: String
-    let items: [ClothingItem]
-
-    var body: some View {
-        VStack(alignment: .leading) {
-            HStack {
-                Text(title)
-                    .font(.title2)
-                    .fontWeight(.bold)
+        ScrollView() {
+            VStack {
+//                HStack {
+//                    Text("Generate Outfit")
+//                        .font(.largeTitle)
+//                        .frame(width: 200, height: 200)
+//                        .background(.red)
+//
+//                    Text("Weather")
+//                        .font(.largeTitle)
+//                        .frame(width: 200, height: 200)
+//                        .background(.red)
+//                }
                 Spacer()
-                NavigationLink("See All →") {
-                    ClothingListView(title: title, items: items)
+                HStack {
+                    Spacer()
+                    VStack(alignment: .leading) {
+                        HStack {
+                            Spacer()
+                            Text("Suggested Outfits")
+                                .font(.title)
+                                .fontWeight(.bold)
+                            Spacer()
+                        }
+                        
+                        
+                        ForEach(0..<2) { index in
+                            HStack {
+                                Spacer()
+                                ForEach(index..<index+2) { i1 in
+                                    Text("Generated Outfit \(index)")
+                                    .font(.largeTitle)
+                                    .frame(width: 150, height: 150)
+                                    .background(.red)
+                                    Spacer()
+                                }
+                                Spacer()
+                            }
+                        }
+                        
+                    }
+//                    Spacer()
+//                    Text("Generated Outfit")
+//                        .font(.largeTitle)
+//                        .frame(width: 150, height: 150)
+//                        .background(.red)
+//                    Spacer()
+//                    Text("Saved Outfits")
+//                        .font(.largeTitle)
+//                        .frame(width: 150, height: 150)
+//                        .background(.red)
+//                    Spacer()
                 }
-                .font(.subheadline)
-                .foregroundColor(.black)
-            }
-            .padding(.horizontal)
+                HStack {
+                    Spacer()
+                    VStack(alignment: .leading) {
+                        HStack {
+                            
+                            Text("👕 Tops")
+                                .font(.title)
+                                .fontWeight(.bold)
+                            Spacer()
+                            Spacer()
+                            Spacer()
+                            Button(action: {
+                                print("Tops action")
+                            }) {
+                                Text("See All →")
+                                    .font(.subheadline)
+                                    .padding(EdgeInsets(top: 15, leading: 0, bottom: 0, trailing: 10))
+                                    .background(Color.clear)
+                                    .foregroundColor(.black)
+                                    .cornerRadius(10)
+                            }
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 20) {
-                    ForEach(items) { item in
-                        ClothingNavigationTile(clothing: item, isLarge: false)
+                        }
+                        
+                        ScrollView(.horizontal) {
+                            HStack(spacing: 20) {
+                                ForEach(0..<5) { index in
+                                    Text("Item \(index)")
+                                        .font(.largeTitle)
+                                        .frame(width: 100, height: 100)
+                                        .background(.red)
+                                }
+                            }
+                            
+                        }
                     }
                 }
-                .padding(.horizontal)
+                .padding(EdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 0))
+                
+                HStack {
+                    Spacer()
+                    VStack(alignment: .leading) {
+                        HStack{
+                            Text("👖 Bottoms")
+                                .font(.title)
+                                .fontWeight(.bold)
+                            
+                            Spacer()
+                            Spacer()
+                            Spacer()
+                            Button(action: {
+                                print("Bottoms action")
+                            }) {
+                                Text("See All →")
+                                    .font(.subheadline)
+                                    .padding(EdgeInsets(top: 15, leading: 0, bottom: 0, trailing: 10))
+                                    .background(Color.clear)
+                                    .foregroundColor(.black)
+                                    .cornerRadius(10)
+                            }
+                        }
+                        
+                        ScrollView(.horizontal) {
+                            HStack(spacing: 20) {
+                                ForEach(0..<5) { index in
+                                    Text("Item \(index)")
+                                        .font(.largeTitle)
+                                        .frame(width: 100, height: 100)
+                                        .background(.red)
+                                }
+                            }
+                            
+                        }
+                    }
+                }
+                .padding(EdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 0))
+
+                
+                HStack {
+                    Spacer()
+                    VStack(alignment: .leading) {
+                        HStack{
+                            Text("👟 Shoes")
+                                .font(.title)
+                                .fontWeight(.bold)
+                            
+                            Spacer()
+                            Spacer()
+                            Spacer()
+                            Button(action: {
+                                print("Shoes action")
+                            }) {
+                                Text("See All →")
+                                    .font(.subheadline)
+                                    .padding(EdgeInsets(top: 15, leading: 0, bottom: 0, trailing: 10))
+                                    .background(Color.clear)
+                                    .foregroundColor(.black)
+                                    .cornerRadius(10)
+                            }
+                        }
+                        
+                        ScrollView(.horizontal) {
+                            HStack(spacing: 20) {
+                                ForEach(0..<5) { index in
+                                    Text("Item \(index)")
+                                        .font(.largeTitle)
+                                        .frame(width: 100, height: 100)
+                                        .background(.red)
+                                }
+                            }
+                            
+                        }
+                    }
+                }
+                .padding(EdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 0))
+
+                
+                Spacer()
+
             }
         }
-        .padding(.vertical)
+        .padding(EdgeInsets(top: 0, leading: 0, bottom: 50, trailing: 0))
     }
 }
 
