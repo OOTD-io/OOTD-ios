@@ -56,7 +56,7 @@ struct OutfitDetailView: View {
             }
             .padding(.vertical)
         }
-        .navigationTitle(outfit.category.capitalized + " Outfit")
+        .navigationTitle(outfit.category.titlecased() + " Outfit")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .toolbar {

@@ -64,11 +64,11 @@ class ClosetViewModel: ObservableObject {
             // Group the clothes
             let groupedItems = Dictionary(grouping: clothesResponse.clothes) { item -> String in
                 switch item.type.lowercased() {
-                case "shirt", "t-shirt", "blouse", "top", "sweater", "hoodie":
+                case "top":
                     return "Tops"
-                case "pants", "jeans", "shorts", "skirt", "trousers":
+                case "bottom":
                     return "Bottoms"
-                case "jacket", "coat", "vest", "blazer":
+                case "outerwear":
                     return "Outwear"
                 case "shoes":
                     return "Shoes"
